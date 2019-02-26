@@ -106,3 +106,11 @@ blocks = [T, I, O, J, L, Z, S]
 # hangame tetris block color!
 blockColors = [(170, 0, 255 ), (0, 255, 255), (255, 255, 0),
               (255, 165, 0), (0, 0, 255), (255, 0, 0), (0, 255, 0)]
+
+class Block:
+    def __init__(self, x, y, idx):
+        self.x = x
+        self.y = y
+        self.block = blocks[idx]
+        self.color = blockColors[idx]
+
