@@ -16,21 +16,26 @@ grid_x = (screen_w - grid_w) // 2
 grid_y = (screen_h - grid_h) // 2
 
 blockSize = 30
+# 테두리 두께
+outline_w = 3
+# 내부 선 두께
+inline_w = 1
 
 def getRandomBlock():
     return Block(5, 0, random.randrange(0, 7))
 
 def drawGrid(surface, grid):
-    pygame.draw.rect(surface, (200, 0, 200), (grid_x, grid_y, grid_w, grid_h), 3)
+    # 회색 배경
+    pygame.draw.rect(surface, (160, 160, 160), (grid_x, grid_y, grid_w + 8 * inline_w, grid_h + 18 * inline_w))
 
-    # 줄로 격자 나누기
-    for i in range(1, len(grid)):
-        row_y = grid_y + (i * blockSize)
-        pygame.draw.line(surface, (160, 160, 160), (grid_x, row_y), (grid_x+grid_w, row_y))
-        for j in range(1, len(grid[i])):
-            col_x = grid_x + (j * blockSize)
-            pygame.draw.line(surface, (160, 160, 160), (col_x, grid_y), (col_x, grid_y + grid_h))
+    for i in range(len(grid)):
+        y = grid_y + (i * (inline_w + blockSize))
+        for j in range(len(grid[i])):
+            x = grid_x + (j * (inline_w + blockSize))
+            pygame.draw.rect(surface, grid[i][j], (x, y, blockSize, blockSize))
 
+    pygame.draw.rect(surface, (180, 0, 180), (grid_x - 3, grid_y - 3, grid_w + (8 * inline_w) + 6, grid_h + (18 * inline_w) + 6), outline_w)
+    
 # grid는 한 칸에 표현할 색을 갖고있음.
 def createGrid():
     return [[(0,0,0) for _ in range(10)] for _ in range(20)]
@@ -71,6 +76,9 @@ def menu(surface):
             if event.type == pygame.QUIT:
                 run = False
             if event.type == pygame.KEYDOWN:
+                if event.key == pygame.K_ESCAPE:
+                    run = False
+                    break
                 gameStart(surface)
 
     pygame.display.quit()
