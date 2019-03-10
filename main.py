@@ -41,8 +41,8 @@ class Conflict(enum.Enum):
 def getRandomBlock():
     return Block(-3, 3, random.randrange(0, 7))
 
-def drawObjectCenter(surface, obj, adjY = 0):
-    x = (screen_w - obj.get_width()) / 2
+def drawObjectCenter(surface, obj, adjX = 0, adjY = 0):
+    x = ((screen_w - obj.get_width()) / 2) + adjX
     y = ((screen_h - obj.get_height()) / 2) + adjY
     surface.blit(obj, (x, y))
 
@@ -50,7 +50,7 @@ def drawMessageCenter(surface, fontName, fontSize, fontColor, bgColor, msg, adjY
     font = pygame.font.SysFont(fontName, fontSize)
     # 둥근 모서리로 흰색 글자 그리기
     textBox = font.render(msg, True, fontColor, bgColor)
-    drawObjectCenter(surface, textBox, adjY)
+    drawObjectCenter(surface, textBox, 0, adjY)
 
 # 블럭 영역에서 실제로 블럭이 그려질 좌표 list 반환
 def getValidPositions(block):
@@ -125,7 +125,9 @@ def checkConflict(grid, block, ignoreList = []):
 def fillDeletedLine(grid, x):
     for i in range(x, 1, -1):
         grid[i] = copy.deepcopy(grid[i - 1])
-    grid[0] = [(0,0,0) for _ in range(grid_col)]
+    grid[0] = [(1,1,1) for _ in range(grid_col)]
+    grid[0][0] = (3,3,3)
+    grid[0][11] = (4,4,4)
 
 def deleteLine(grid):
     for i in range(1, 21):
@@ -180,6 +182,7 @@ def gameStart(surface):
     # 떨어지는 단계 시간 관리
     dropLevelTime = 0
     delayTime = 0
+
     while run:
         clock.tick(gameFPS)
         droppedBlock = False
@@ -247,7 +250,6 @@ def gameStart(surface):
                             break
 
         copiedGrid = copy.deepcopy(grid)
-
 
 def menu(surface):
     run = True
