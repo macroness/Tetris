@@ -41,6 +41,14 @@ class Conflict(enum.Enum):
 def getRandomBlock():
     return Block(-3, 3, random.randrange(0, 7))
 
+def drawMessageCenter(surface, fontName, fontSize, fontColor, msg):
+    font = pygame.font.SysFont(fontName, fontSize)
+    # 둥근 모서리로 흰색 글자 그리기
+    textBox = font.render(msg, 1, fontColor)
+    msgX = (screen_w - textBox.get_width()) / 2
+    msgY = (screen_h - textBox.get_height()) / 2
+    surface.blit(textBox, (msgX, msgY))
+
 # 블럭 영역에서 실제로 블럭이 그려질 좌표 list 반환
 def getValidPositions(block):
     positions = []
@@ -224,11 +232,8 @@ def menu(surface):
 
     while run:
         surface.fill((0,0,0)) # 메뉴 창 검정색 바탕
+        drawMessageCenter(surface, "Arial", 20, (255, 255, 255), "Press Any Key...")
 
-        font = pygame.font.SysFont("Arial", 20)
-        # 둥근 모서리로 흰색 글자 그리기
-        textBox = font.render("Press Any Key ...", 1, (255, 255, 255))
-        surface.blit(textBox, (350, 450))
         pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
