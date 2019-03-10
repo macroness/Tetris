@@ -162,20 +162,24 @@ def gameStart(surface):
     dropTime = 0
     # 떨어지는 단계 시간 관리
     dropLevelTime = 0
-    delayTime1 = 0
+    delayTime = 0
     while run:
         clock.tick(gameFPS)
         droppedBlock = False
         # 1/1000 sec
-        delayTime1 += clock.get_time()
+        delayTime += clock.get_time()
         dropLevelTime += clock.get_time()
 
-        if (delayTime1 / 1000) >= dropSpeed:
-            delayTime1 = 0
+        if (delayTime / 1000) > dropSpeed:
+            delayTime = 0
             currentBlock.x += 1
             if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
                 currentBlock.x -= 1
                 droppedBlock = True
+
+        if (dropLevelTime / 1000) > 10:
+            dropLevelTime = 0
+            dropSpeed = dropSpeed * 0.7
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
