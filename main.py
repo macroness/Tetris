@@ -41,17 +41,16 @@ class Conflict(enum.Enum):
 def getRandomBlock():
     return Block(-3, 3, random.randrange(0, 7))
 
-def drawObjectCenter(surface, obj):
+def drawObjectCenter(surface, obj, adjY = 0):
     x = (screen_w - obj.get_width()) / 2
-    y = (screen_h - obj.get_height()) / 2
-
+    y = ((screen_h - obj.get_height()) / 2) + adjY
     surface.blit(obj, (x, y))
 
-def drawMessageCenter(surface, fontName, fontSize, fontColor, msg):
+def drawMessageCenter(surface, fontName, fontSize, fontColor, bgColor, msg, adjY = 0):
     font = pygame.font.SysFont(fontName, fontSize)
     # 둥근 모서리로 흰색 글자 그리기
-    textBox = font.render(msg, 1, fontColor)
-    drawObjectCenter(surface, textBox)
+    textBox = font.render(msg, True, fontColor, bgColor)
+    drawObjectCenter(surface, textBox, adjY)
 
 # 블럭 영역에서 실제로 블럭이 그려질 좌표 list 반환
 def getValidPositions(block):
@@ -153,6 +152,12 @@ def getDroppedDistance(grid, block):
 
     return tmpBlock.x - block.x
 
+def checkFinish(grid):
+    for i in range(1,11):
+        if grid[0][i] != (1,1,1):
+            return True
+    return False
+
 def updateScreen(surface, grid):
     surface.fill((0,0,0))
 
@@ -229,14 +234,27 @@ def gameStart(surface):
             deleteLine(grid)
 
         updateScreen(surface, copiedGrid)
+
+        if checkFinish(grid):
+            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Game Over! Gga Bi!")
+            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Press ESC to go to the menu", 50)
+            pygame.display.flip()
+            while run:
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            run = False
+                            break
+
         copiedGrid = copy.deepcopy(grid)
+
 
 def menu(surface):
     run = True
 
     while run:
         surface.fill((0,0,0)) # 메뉴 창 검정색 바탕
-        drawMessageCenter(surface, "Arial", 20, (255, 255, 255), "Press Any Key...")
+        drawMessageCenter(surface, "Arial", 20, (255, 255, 255), (0, 0, 0),  "Press Any Key...")
 
         pygame.display.flip()
         for event in pygame.event.get():
