@@ -10,8 +10,14 @@ pygame.init()
 screen_w = 700
 screen_h = 900
 
-grid_w = 10 * 30
-grid_h = 20 * 30
+blockSize = 30
+# 테두리 두께
+outline_w = 3
+# 내부 선 두께
+inline_w = 1
+
+grid_w = (10*blockSize) + (9*inline_w) + (2*outline_w)
+grid_h = (20*blockSize) + (19*inline_w) + (2*outline_w)
 
 grid_col = 12
 grid_row = 22
@@ -19,12 +25,6 @@ grid_row = 22
 # grid 시작 점 (x,y) 좌표 (왼쪽 위 꼭지점)
 grid_x = (screen_w - grid_w) // 2
 grid_y = (screen_h - grid_h) // 2
-
-blockSize = 30
-# 테두리 두께
-outline_w = 3
-# 내부 선 두께
-inline_w = 1
 
 # 초당 프레임
 gameFPS = 30
@@ -39,14 +39,26 @@ class Conflict(enum.Enum):
     BLOCK = 5
 
 def getRandomBlock():
-    return Block(-3, 3, random.randrange(0, 7))
+    return Block(-2, 3, random.randrange(0, 7))
+
+def drawSubsurface(surface, subSurface, centerX, centerY):
+    rect = subSurface.get_rect()
+    rect.center = (centerX, centerY)
+
+    surface.blit(subSurface, rect)
 
 def drawObjectCenter(surface, obj, adjX = 0, adjY = 0):
-    x = ((screen_w - obj.get_width()) / 2) + adjX
-    y = ((screen_h - obj.get_height()) / 2) + adjY
-    surface.blit(obj, (x, y))
+    centerX = screen_w // 2 + adjX
+    centerY = screen_h // 2 + adjY
+    drawSubsurface(surface, obj, centerX, centerY)
 
 def drawMessageCenter(surface, fontName, fontSize, fontColor, bgColor, msg, adjY = 0):
+    font = pygame.font.SysFont(fontName, fontSize)
+    # 둥근 모서리로 흰색 글자 그리기
+    textBox = font.render(msg, True, fontColor, bgColor)
+    drawObjectCenter(surface, textBox, 0, adjY)
+
+def drawMessage(surface, fontName, fontSize, fontColor, bgColor, msg, msgX, msgY):
     font = pygame.font.SysFont(fontName, fontSize)
     # 둥근 모서리로 흰색 글자 그리기
     textBox = font.render(msg, True, fontColor, bgColor)
@@ -68,15 +80,15 @@ def drawBlock(grid, positions, color):
 
 def drawGrid(surface, grid):
     # 회색 배경
-    pygame.draw.rect(surface, (160, 160, 160), (grid_x, grid_y, grid_w + 8 * inline_w, grid_h + 18 * inline_w))
+    pygame.draw.rect(surface, (160, 160, 160), (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
 
     for i in range(0, grid_row - 2):
-        y = grid_y + (i * (inline_w + blockSize))
+        y = 3 + i * (inline_w + blockSize)
         for j in range(0, grid_col - 2):
-            x = grid_x + (j * (inline_w + blockSize))
+            x = 3 + j * (inline_w + blockSize)
             pygame.draw.rect(surface, grid[i+1][j+1], (x, y, blockSize, blockSize))
 
-    pygame.draw.rect(surface, (180, 0, 180), (grid_x - 3, grid_y - 3, grid_w + (8 * inline_w) + 6, grid_h + (18 * inline_w) + 6), outline_w)
+    pygame.draw.rect(surface, (180, 0, 180), (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
 
 # grid는 한 칸에 표현할 색을 갖고있음.
 def createGrid():
@@ -101,6 +113,21 @@ def createGrid():
                 grid[i][j] = (4,4,4)
 
     return grid
+
+def createGridSurface(surface):
+    rectCenter = (screen_w/2, screen_h/2)
+    rectWidth = grid_w
+    rectHeight = grid_h
+    rect = surface.get_rect(w = rectWidth, h = rectHeight, center = rectCenter)
+    gridSurface = surface.subsurface(rect)
+
+    return gridSurface
+
+def createNextBlockSurface(surface):
+    rectWidth = (((screen_w - grid_w) // 2) * 0.70) // 1
+    rectHeight = rectW
+    rectX = ((screen_w + grid_w) // 2) + ((((screen_w - grid_w) / 2) - rectW) // 2)
+    rectY = (screen_h * 0.25) // 1
 
 # 충돌한 위치를 반환.
 def checkConflict(grid, block, ignoreList = []):
@@ -160,21 +187,38 @@ def checkFinish(grid):
             return True
     return False
 
-def updateScreen(surface, grid):
+def updateNextBlock(surface, nextBlock):
+    rectW = (((screen_w - grid_w) // 2) * 0.70) // 1
+    rectH = rectW
+    rectX = ((screen_w + grid_w) // 2) + ((((screen_w - grid_w) / 2) - rectW) // 2)
+    rectY = (screen_h * 0.25) // 1
+    pygame.draw.rect(surface, (100, 0, 100), (rectX, rectY, rectW, rectH), outline_w)
+
+    drawMessageCenter(surface, "Arial", 26, (80, 100, 160), (0, 0, 0), "Next Block", 50)
+
+def updateScreen(surface, gridSurface, grid):
     surface.fill((0,0,0))
 
-    drawGrid(surface, grid)
+    drawGrid(gridSurface, grid)
+
+    updateNextBlock(surface, 0)
     pygame.display.flip()
 
 def gameStart(surface):
-
     run = True
     grid = createGrid()
+    gridSurface = createGridSurface(surface)
+
     currentBlock = getRandomBlock()
+    nextBlock = getRandomBlock()
+
     blockValidPositions = getValidPositions(currentBlock)
     copiedGrid = copy.deepcopy(grid)
+
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
-    updateScreen(surface, copiedGrid)
+
+    updateScreen(surface, gridSurface, copiedGrid)
+
     # 최초 2초에 한칸!
     dropSpeed = 2
     # 떨어지는 시간 관리
@@ -182,74 +226,82 @@ def gameStart(surface):
     # 떨어지는 단계 시간 관리
     dropLevelTime = 0
     delayTime = 0
-
     while run:
-        clock.tick(gameFPS)
-        droppedBlock = False
-        # 1/1000 sec
-        delayTime += clock.get_time()
-        dropLevelTime += clock.get_time()
-
-        if (delayTime / 1000) > dropSpeed:
-            delayTime = 0
-            currentBlock.x += 1
-            if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
-                currentBlock.x -= 1
-                droppedBlock = True
-
-        if (dropLevelTime / 1000) > 10:
-            dropLevelTime = 0
-            dropSpeed = dropSpeed * 0.7
-
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
                     break
-                elif event.key == pygame.K_SPACE:
-                    distance = getDroppedDistance(copiedGrid, currentBlock)
-                    currentBlock.x += distance
-                    droppedBlock = True
-                elif event.key == pygame.K_DOWN:
-                    currentBlock.x += 1
-                    if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
-                        currentBlock.x -= 1
-                        droppedBlock = True
-                elif event.key == pygame.K_LEFT:
-                    currentBlock.y -= 1
-                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
-                        currentBlock.y += 1
-                elif event.key == pygame.K_RIGHT:
-                    currentBlock.y += 1
-                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
-                        currentBlock.y -= 1
-                elif event.key == pygame.K_UP:
-                    currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
-                    if checkConflict(grid, currentBlock,[Conflict.TOP]) != Conflict.NONE:
-                        currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
 
-        blockValidPositions = getValidPositions(currentBlock)
-        drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
-
-        if droppedBlock:
-            currentBlock = getRandomBlock()
-            grid = copy.deepcopy(copiedGrid)
-            deleteLine(grid)
-
-        updateScreen(surface, copiedGrid)
-
-        if checkFinish(grid):
-            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Game Over! Gga Bi!")
-            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Press ESC to go to the menu", 50)
-            pygame.display.flip()
-            while run:
-                for event in pygame.event.get():
-                    if event.type == pygame.KEYDOWN:
-                        if event.key == pygame.K_ESCAPE:
-                            run = False
-                            break
-
-        copiedGrid = copy.deepcopy(grid)
+#    while run:
+#        clock.tick(gameFPS)
+#        droppedBlock = False
+#        # 1/1000 sec
+#        delayTime += clock.get_time()
+#        dropLevelTime += clock.get_time()
+#
+#        if (delayTime / 1000) > dropSpeed:
+#            delayTime = 0
+#            currentBlock.x += 1
+#            if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
+#                currentBlock.x -= 1
+#                droppedBlock = True
+#
+#        if (dropLevelTime / 1000) > 10:
+#            dropLevelTime = 0
+#            dropSpeed = dropSpeed * 0.7
+#
+#        for event in pygame.event.get():
+#            if event.type == pygame.KEYDOWN:
+#                if event.key == pygame.K_ESCAPE:
+#                    run = False
+#                    break
+#                elif event.key == pygame.K_SPACE:
+#                    distance = getDroppedDistance(copiedGrid, currentBlock)
+#                    currentBlock.x += distance
+#                    droppedBlock = True
+#                elif event.key == pygame.K_DOWN:
+#                    currentBlock.x += 1
+#                    if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
+#                        currentBlock.x -= 1
+#                        droppedBlock = True
+#                elif event.key == pygame.K_LEFT:
+#                    currentBlock.y -= 1
+#                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
+#                        currentBlock.y += 1
+#                elif event.key == pygame.K_RIGHT:
+#                    currentBlock.y += 1
+#                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
+#                        currentBlock.y -= 1
+#                elif event.key == pygame.K_UP:
+#                    currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
+#                    if checkConflict(grid, currentBlock,[Conflict.TOP]) != Conflict.NONE:
+#                        currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
+#
+#        blockValidPositions = getValidPositions(currentBlock)
+#        drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
+#
+#
+#        if droppedBlock:
+#            currentBlock = nextBlock
+#            nextBlock = getRandomBlock()
+#            grid = copy.deepcopy(copiedGrid)
+#            deleteLine(grid)
+#
+#        updateScreen(surface, copiedGrid)
+#
+#        if checkFinish(grid):
+#            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Game Over! Gga Bi!")
+#            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Press ESC to go to the menu", 50)
+#            pygame.display.flip()
+#            while run:
+#                for event in pygame.event.get():
+#                    if event.type == pygame.KEYDOWN:
+#                        if event.key == pygame.K_ESCAPE:
+#                            run = False
+#                            break
+#
+#        copiedGrid = copy.deepcopy(grid)
 
 def menu(surface):
     run = True
