@@ -1,3 +1,4 @@
+import enum
 # 5 x 5 block set
 
 T = [['.....',
@@ -102,16 +103,27 @@ S = [['.....',
       '...X.',
       '.....']]
 
+class BlockType(enum.Enum):
+    T = 0
+    I = 1
+    O = 2
+    J = 3
+    L = 4
+    Z = 5
+    S = 6
+
 blocks = [T, I, O, J, L, Z, S]
 # hangame tetris block color!
 blockColors = [(170, 0, 255 ), (0, 255, 255), (255, 255, 0),
               (255, 165, 0), (0, 0, 255), (255, 0, 0), (0, 255, 0)]
 
 class Block:
-    def __init__(self, x, y, idx):
+    def __init__(self, x, y, blockType):
         self.x = x
         self.y = y
-        self.block = blocks[idx]
-        self.color = blockColors[idx]
+        self.block = blocks[blockType]
+        self.color = blockColors[blockType]
         self.rotation = 0
+        self.blockType = blockType
+
 
