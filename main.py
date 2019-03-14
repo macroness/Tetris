@@ -53,7 +53,7 @@ class Conflict(enum.Enum):
     BLOCK = 5
 
 def getRandomBlock():
-    return Block(-2, 3, random.randrange(0, 7))
+    return Block(-2, 4, random.randrange(0, 7))
 
 def drawSubsurface(surface, subsurface, centerX, centerY):
     rect = subsurface.get_rect()
@@ -276,6 +276,8 @@ def checkFinish(grid):
 
 def updateBlockBoxSurface(surface, block):
     pygame.draw.rect(surface, (100, 0, 100), (0, 0, nextBlockRect_w, nextBlockRect_w), outline_w)
+    if block == None:
+        return
 
     centerX = nextBlockRect_w // 2
     centerY = nextBlockRect_h // 2
@@ -315,7 +317,7 @@ def gameStart(surface):
 
     currentBlock = getRandomBlock()
     nextBlock = getRandomBlock()
-    holdBlock = getRandomBlock()
+    holdBlock = None
 
     blockValidPositions = getValidPositions(currentBlock)
     copiedGrid = copy.deepcopy(grid)
@@ -359,6 +361,19 @@ def gameStart(surface):
                     distance = getDroppedDistance(copiedGrid, currentBlock)
                     currentBlock.x += distance
                     droppedBlock = True
+                elif event.key == pygame.K_LSHIFT:
+                    if holdBlock == None:
+                        holdBlock = currentBlock
+                        currentBlock = nextBlock
+                        nextBlock = getRandomBlock()
+                    else:
+                        tmpBlock = holdBlock
+                        holdBlock = currentBlock
+                        currentBlock = tmpBlock
+                    holdBlock.x = -2
+                    holdBlock.y = 4
+                    holdBlock.rotation = 0
+
                 elif event.key == pygame.K_DOWN:
                     currentBlock.x += 1
                     if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
