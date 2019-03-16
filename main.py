@@ -326,6 +326,7 @@ def gameStart(surface):
 
     updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock)
 
+    pygame.key.set_repeat(200, 50)
     # 최초 2초에 한칸!
     dropSpeed = 2
     # 떨어지는 시간 관리
