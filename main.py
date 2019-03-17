@@ -401,6 +401,7 @@ def gameStart(surface):
     delayTime = 0
 
     comboStack = 0
+    tetrisComboStack = 0
 
     while run:
         clock.tick(gameFPS)
@@ -509,12 +510,16 @@ def gameStart(surface):
 
             if delLineCount > 0:
                 comboStack += 1
+                if delLineCount == 4:
+                    tetrisComboStack += 1
+                else:
+                    tetrisComboStack = 0
             else:
                 comboStack = 0
 
             if delLineCount == 4:
                 # tetris(4줄을 한번에 없애는 것)는 점수 2배
-                score += delLineCount * 10 * 2 * comboStack
+                score += delLineCount * 10 * 2 * comboStack * tetrisComboStack
             else:
                 score += delLineCount * 10 * comboStack
 
