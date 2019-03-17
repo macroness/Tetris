@@ -400,6 +400,8 @@ def gameStart(surface):
     dropLevelTime = 0
     delayTime = 0
 
+    comboStack = 0
+
     while run:
         clock.tick(gameFPS)
         droppedBlock = False
@@ -504,11 +506,17 @@ def gameStart(surface):
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
             delLineCount = deleteLine(grid)
+
+            if delLineCount > 0:
+                comboStack += 1
+            else:
+                comboStack = 0
+
             if delLineCount == 4:
                 # tetris(4줄을 한번에 없애는 것)는 점수 2배
-                score += delLineCount * 10 * 2
+                score += delLineCount * 10 * 2 * comboStack
             else:
-                score += delLineCount * 10
+                score += delLineCount * 10 * comboStack
 
         updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
 
