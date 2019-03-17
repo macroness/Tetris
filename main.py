@@ -218,22 +218,60 @@ def createHoldBlockSurface(surface):
 # 충돌한 위치를 반환.
 def checkConflict(grid, block, ignoreList = []):
     positions = getValidPositions(block)
+    retList = []
 
     for pos in positions:
-        if pos[0] >= 0 and pos[1] >= 0:
+        if pos[0] >= 0 and pos[0] < 22 and pos[1] >= 0 and pos[1] < 12:
             pixelColor = grid[pos[0]][pos[1]]
             if (Conflict.TOP not in ignoreList) and (pixelColor == (1,1,1)):
-                return Conflict.TOP
+                retList.append(Conflict.TOP)
             if (Conflict.BOTTOM not in ignoreList) and (pixelColor == (2,2,2)):
-                return Conflict.BOTTOM
+                retList.append(Conflict.BOTTOM)
             if (Conflict.LEFT not in ignoreList) and (pixelColor == (3,3,3)):
-                return Conflict.LEFT
+                retList.append(Conflict.LEFT)
             if (Conflict.RIGHT not in ignoreList) and (pixelColor == (4,4,4)):
-                return Conflict.RIGHT
+                retList.append(Conflict.RIGHT)
             if pixelColor[0] > 4 or pixelColor[1] > 4 or pixelColor[2] > 4:
-                return Conflict.BLOCK
+                retList.append(Conflict.BLOCK)
 
-    return Conflict.NONE
+    return retList
+
+def checkRightRotationConflict(grid, currentBlock):
+    adjustX = 0
+    adjustY = 0
+    if currentBlock.blockType == BlockType.I.value:
+        adjustY = -2
+    else:
+        adjustY = -1
+    currentBlock.y += adjustY
+    conflictTypeList = checkConflict(grid, currentBlock, [Conflict.TOP])
+    # 왼쪽으로 한 칸 갔는데도 블럭과 충돌이나면 위로도 보내본다.
+    if len(conflictTypeList) != 0:
+        adjustX = -1
+        currentBlock.x += adjustX
+        if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
+            # 위로도 보내봤는데 충돌나면 다시 원래 위치로.
+            currentBlock.x -= adjustX
+            currentBlock.y -= adjustY
+            currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
+            return False
+    return True
+
+def checkLeftRotationConflict(grid, currentBlock):
+    adjustY = 1
+    currentBlock.y += adjustY
+    conflictTypeList = checkConflict(grid, currentBlock, [Conflict.TOP])
+    # 오른쪽으로 한 칸 갔는데도 블럭과 충돌이나면 위로도 보내본다.
+    if len(conflictTypeList) != 0:
+        adjustX = -1
+        currentBlock.x += adjustX
+        if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
+            # 위로도 보내봤는데 충돌나면 다시 원래 위치로.
+            currentBlock.x -= adjustX
+            currentBlock.y -= adjustY
+            currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
+            return False
+    return True
 
 def fillDeletedLine(grid, x):
     for i in range(x, 1, -1):
@@ -261,7 +299,7 @@ def getDroppedDistance(grid, block):
     tmpBlock = copy.deepcopy(block)
     while True:
         tmpBlock.x += 1
-        if checkConflict(grid, tmpBlock, [Conflict.TOP]) != Conflict.NONE:
+        if len(checkConflict(grid, tmpBlock, [Conflict.TOP])) != 0:
             tmpBlock.x -= 1
             break
 
@@ -345,7 +383,7 @@ def gameStart(surface):
         if (delayTime / 1000) > dropSpeed:
             delayTime = 0
             currentBlock.x += 1
-            if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
+            if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                 currentBlock.x -= 1
                 droppedBlock = True
 
@@ -377,21 +415,38 @@ def gameStart(surface):
 
                 elif event.key == pygame.K_DOWN:
                     currentBlock.x += 1
-                    if checkConflict(grid, currentBlock, [Conflict.TOP]) != Conflict.NONE:
+                    if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                         currentBlock.x -= 1
                         droppedBlock = True
                 elif event.key == pygame.K_LEFT:
                     currentBlock.y -= 1
-                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
+                    if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y += 1
                 elif event.key == pygame.K_RIGHT:
                     currentBlock.y += 1
-                    if checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP]) != Conflict.NONE:
+                    if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y -= 1
                 elif event.key == pygame.K_UP:
                     currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
-                    if checkConflict(grid, currentBlock,[Conflict.TOP]) != Conflict.NONE:
-                        currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
+#                    if len(checkConflict(grid, currentBlock,[Conflict.TOP])) != 0:
+#                        currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
+                    conflictTypeList = checkConflict(grid, currentBlock,[Conflict.TOP])
+                    if len(conflictTypeList) != 0:
+                        if Conflict.LEFT in conflictTypeList:
+                            checkLeftRotationConflict(grid, currentBlock)
+                        elif Conflict.RIGHT in conflictTypeList:
+                            checkRightRotationConflict(grid, currentBlock)
+                        elif Conflict.BLOCK in conflictTypeList:
+                            # 블럭과 충돌이면 일단 위로한칸 올려보고 안되면 왼쪽오른쪽 해본다.
+                            currentBlock.x -= 1
+                            if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
+                                currentBlock.x += 1
+
+                                if checkLeftRotationConflict(grid, currentBlock):
+                                    break
+                                currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
+                                if checkRightRotationConflict(grid, currentBlock):
+                                    break
 
         blockValidPositions = getValidPositions(currentBlock)
         drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
