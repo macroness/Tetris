@@ -414,8 +414,10 @@ def gameStart(surface):
                 if (delayTime - infinity) / 1000 > dropSpeed:
                     droppedBlock = True
                     delayTime = 0
+                    infinity = 0
             else:
                 delayTime = 0
+                infinity = 0
 
         if (dropLevelTime / 1000) > levelUpTime:
             dropLevelTime = 0
