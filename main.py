@@ -281,6 +281,7 @@ def fillDeletedLine(grid, x):
     grid[0][11] = (4,4,4)
 
 def deleteLine(grid):
+    count = 0
     for i in range(1, 21):
         delLine = False
         for j in range(1, 11):
@@ -291,9 +292,11 @@ def deleteLine(grid):
                 break
 
         if delLine:
+            count += 1
             for j in range(1,11):
                 grid[i][j] = (0,0,0)
             fillDeletedLine(grid, i)
+    return count
 
 def getDroppedDistance(grid, block):
     tmpBlock = copy.deepcopy(block)
@@ -335,7 +338,7 @@ def updateBlockBoxSurface(surface, block):
     drawBlockBox(surface.subsurface(rect), block.blockType, block.color)
 
 
-def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, grid, nextBlock, holdBlock):
+def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, grid, nextBlock, holdBlock, score):
     surface.fill((0,0,0))
 
     drawGrid(gridSurface, grid)
@@ -344,6 +347,8 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, grid,
     updateBlockBoxSurface(holdBlockSurface, holdBlock)
     drawMessage(surface, "Ariel", 20, (150,150,0), (0,0,0), "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
     drawMessage(surface, "Ariel", 20, (150,150,0), (0,0,0), "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
+
+    drawMessageCenter(surface, "Arial", 30, (255, 255, 255), (0, 0, 0), "SCORE : " + str(score), -360)
     pygame.display.flip()
 
 def gameStart(surface):
@@ -362,7 +367,8 @@ def gameStart(surface):
 
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
-    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock)
+    score = 0
+    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
 
     pygame.key.set_repeat(200, 50)
     # 최초 2초에 한칸!
@@ -451,14 +457,18 @@ def gameStart(surface):
         blockValidPositions = getValidPositions(currentBlock)
         drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
-
         if droppedBlock:
             currentBlock = nextBlock
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
-            deleteLine(grid)
+            delLineCount = deleteLine(grid)
+            if delLineCount == 4:
+                # tetris(4줄을 한번에 없애는 것)는 점수 2배
+                score += delLineCount * 10 * 2
+            else:
+                score += delLineCount * 10
 
-        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock)
+        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
 
         if checkFinish(grid):
             drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Game Over! Gga Bi!")
