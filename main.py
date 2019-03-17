@@ -44,6 +44,12 @@ grid_y = (screen_h - grid_h) // 2
 gameFPS = 60
 clock = pygame.time.Clock()
 
+# 중력 레벨업 되는 시간
+levelUpTime = 10
+
+# 중력 레벨업시 배수
+gravityMultiple = 0.7
+
 class Conflict(enum.Enum):
     NONE = 0 # 충돌하지 않음
     TOP = 1
@@ -382,6 +388,9 @@ def gameStart(surface):
     score = 0
     updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
 
+    # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
+    infinity = 0
+
     pygame.key.set_repeat(200, 50)
     # 최초 2초에 한칸!
     dropSpeed = 2
@@ -399,15 +408,18 @@ def gameStart(surface):
         dropLevelTime += clock.get_time()
 
         if (delayTime / 1000) > dropSpeed:
-            delayTime = 0
             currentBlock.x += 1
             if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                 currentBlock.x -= 1
-                droppedBlock = True
+                if (delayTime - infinity) / 1000 > dropSpeed:
+                    droppedBlock = True
+                    delayTime = 0
+            else:
+                delayTime = 0
 
-        if (dropLevelTime / 1000) > 10:
+        if (dropLevelTime / 1000) > levelUpTime:
             dropLevelTime = 0
-            dropSpeed = dropSpeed * 0.7
+            dropSpeed = dropSpeed * gravityMultiple
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -440,31 +452,41 @@ def gameStart(surface):
                     currentBlock.y -= 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y += 1
+                    else:
+                        infinity = delayTime
                 elif event.key == pygame.K_RIGHT:
                     currentBlock.y += 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y -= 1
+                    else:
+                        infinity = delayTime
                 elif event.key == pygame.K_UP:
                     currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
-#                    if len(checkConflict(grid, currentBlock,[Conflict.TOP])) != 0:
-#                        currentBlock.rotation = (currentBlock.rotation - 1 + len(currentBlock.block)) % len(currentBlock.block)
                     conflictTypeList = checkConflict(grid, currentBlock,[Conflict.TOP])
                     if len(conflictTypeList) != 0:
                         if Conflict.LEFT in conflictTypeList:
-                            checkLeftRotationConflict(grid, currentBlock)
+                            if checkLeftRotationConflict(grid, currentBlock):
+                                infinity = delayTime
                         elif Conflict.RIGHT in conflictTypeList:
-                            checkRightRotationConflict(grid, currentBlock)
-                        elif Conflict.BLOCK in conflictTypeList:
+                            if checkRightRotationConflict(grid, currentBlock):
+                                infinity = delayTime
+                        elif Conflict.BLOCK in conflictTypeList or Conflict.BOTTOM in conflictTypeList:
                             # 블럭과 충돌이면 일단 위로한칸 올려보고 안되면 왼쪽오른쪽 해본다.
                             currentBlock.x -= 1
                             if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                                 currentBlock.x += 1
 
                                 if checkLeftRotationConflict(grid, currentBlock):
+                                    infinity = delayTime
                                     break
                                 currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                                 if checkRightRotationConflict(grid, currentBlock):
+                                    infinity = delayTime
                                     break
+                            else:
+                                infinity = delayTime
+                    else:
+                        infinity = delayTime
 
                 ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
