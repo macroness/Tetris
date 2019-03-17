@@ -314,6 +314,13 @@ def checkFinish(grid):
             return True
     return False
 
+def setGhostBlock(copiedGrid, currentBlock):
+    ghostBlock = copy.deepcopy(currentBlock)
+    ghostDistance = getDroppedDistance(copiedGrid, currentBlock)
+    ghostBlock.x += ghostDistance
+    ghostBlock.color = (70,70,70)
+
+    return ghostBlock
 
 def updateBlockBoxSurface(surface, block):
     pygame.draw.rect(surface, (100, 0, 100), (0, 0, nextBlockRect_w, nextBlockRect_w), outline_w)
@@ -354,17 +361,22 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, grid,
 def gameStart(surface):
     run = True
     grid = createGrid()
+    copiedGrid = copy.deepcopy(grid)
+
     gridSurface = createGridSurface(surface)
     nextBlockSurface = createNextBlockSurface(surface)
     holdBlockSurface = createHoldBlockSurface(surface)
 
     currentBlock = getRandomBlock()
+    ghostBlock = setGhostBlock(copiedGrid, currentBlock)
+
     nextBlock = getRandomBlock()
     holdBlock = None
 
     blockValidPositions = getValidPositions(currentBlock)
-    copiedGrid = copy.deepcopy(grid)
+    ghostValidPositions = getValidPositions(ghostBlock)
 
+    drawBlock(copiedGrid, ghostValidPositions, ghostBlock.color)
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
     score = 0
@@ -454,11 +466,17 @@ def gameStart(surface):
                                 if checkRightRotationConflict(grid, currentBlock):
                                     break
 
+                ghostBlock = setGhostBlock(copiedGrid, currentBlock)
+
         blockValidPositions = getValidPositions(currentBlock)
+        ghostValidPositions = getValidPositions(ghostBlock)
+        drawBlock(copiedGrid, ghostValidPositions, ghostBlock.color)
         drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
         if droppedBlock:
             currentBlock = nextBlock
+            ghostBlock = setGhostBlock(copiedGrid, currentBlock)
+
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
             delLineCount = deleteLine(grid)
