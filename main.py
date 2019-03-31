@@ -2,11 +2,19 @@ import pygame
 import random
 import copy
 import enum
+import os
 
 from block import Block
 from block import BlockType
 
 pygame.init()
+
+# colors
+black = (0,0,0)
+white = (255,255,255)
+purple = (180,0,180)
+gray = (160,160,160)
+yellow = (150,150,0)
 
 screen_w = 700
 screen_h = 900
@@ -99,15 +107,15 @@ def drawBlock(grid, positions, color):
             grid[pos[0]][pos[1]] = color
 
 def drawBlockBox(surface, blockType, color):
-    pygame.draw.rect(surface, (160,160,160), surface.get_rect())
+    pygame.draw.rect(surface, gray, surface.get_rect())
     if blockType == BlockType.I.value:
-        pygame.draw.rect(surface, (160,160,160), surface.get_rect())
+        pygame.draw.rect(surface, gray, surface.get_rect())
         for i in range(4):
             x = 1 + i*(nextBlockSize + inline_w)
             y = 1
             pygame.draw.rect(surface, color, (x, y, nextBlockSize, nextBlockSize))
     elif blockType == BlockType.O.value:
-        pygame.draw.rect(surface, (160,160,160), surface.get_rect())
+        pygame.draw.rect(surface, gray, surface.get_rect())
         for i in range(2):
             x = 1 + i*(nextBlockSize + inline_w)
             for j in range(2):
@@ -122,8 +130,8 @@ def drawBlockBox(surface, blockType, color):
                 if (i,j) in posList:
                     pygame.draw.rect(surface, color, (y, x, nextBlockSize, nextBlockSize))
         # 빈칸 검은색으로 채우기
-        pygame.draw.rect(surface, (0,0,0), (0,0,21,21))
-        pygame.draw.rect(surface, (0,0,0), (43,0,21,21))
+        pygame.draw.rect(surface, black, (0,0,21,21))
+        pygame.draw.rect(surface, black, (43,0,21,21))
     elif blockType == BlockType.J.value:
         posList = [(0,0), (1,0), (1,1), (1,2)]
         for i in range(2):
@@ -133,7 +141,7 @@ def drawBlockBox(surface, blockType, color):
                 if (i,j) in posList:
                     pygame.draw.rect(surface, color, (y, x, nextBlockSize, nextBlockSize))
         # 빈칸 검은색으로 채우기
-        pygame.draw.rect(surface, (0,0,0), (22,0,42,21))
+        pygame.draw.rect(surface, black, (22,0,42,21))
     elif blockType == BlockType.L.value:
         posList = [(0,2), (1,0), (1,1), (1,2)]
         for i in range(2):
@@ -143,7 +151,7 @@ def drawBlockBox(surface, blockType, color):
                 if (i,j) in posList:
                     pygame.draw.rect(surface, color, (y, x, nextBlockSize, nextBlockSize))
         # 빈칸 검은색으로 채우기
-        pygame.draw.rect(surface, (0,0,0), (0,0,42,21))
+        pygame.draw.rect(surface, black, (0,0,42,21))
     elif blockType == BlockType.Z.value:
         posList = [(0,0), (0,1), (1,1), (1,2)]
         for i in range(2):
@@ -153,8 +161,8 @@ def drawBlockBox(surface, blockType, color):
                 if (i,j) in posList:
                     pygame.draw.rect(surface, color, (y, x, nextBlockSize, nextBlockSize))
         # 빈칸 검은색으로 채우기
-        pygame.draw.rect(surface, (0,0,0), (43,0,21,21))
-        pygame.draw.rect(surface, (0,0,0), (0,22,21,21))
+        pygame.draw.rect(surface, black, (43,0,21,21))
+        pygame.draw.rect(surface, black, (0,22,21,21))
     elif blockType == BlockType.S.value:
         posList = [(0,1), (0,2), (1,0), (1,1)]
         for i in range(2):
@@ -164,12 +172,28 @@ def drawBlockBox(surface, blockType, color):
                 if (i,j) in posList:
                     pygame.draw.rect(surface, color, (y, x, nextBlockSize, nextBlockSize))
         # 빈칸 검은색으로 채우기
-        pygame.draw.rect(surface, (0,0,0), (0,0,21,21))
-        pygame.draw.rect(surface, (0,0,0), (43,22,21,21))
+        pygame.draw.rect(surface, black, (0,0,21,21))
+        pygame.draw.rect(surface, black, (43,22,21,21))
+
+def drawItemSlot(surface, itemList):
+    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().top) , (surface.get_rect().right, surface.get_rect().top), outline_w)
+    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().top) , (surface.get_rect().left, surface.get_rect().bottom), outline_w)
+    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().bottom - 1) , (surface.get_rect().right - 1, surface.get_rect().bottom - 1), outline_w)
+    pygame.draw.line(surface, purple, (surface.get_rect().right - 1, surface.get_rect().top) , (surface.get_rect().right - 1, surface.get_rect().bottom), outline_w)
+
+    for i in range(1,10):
+        x = outline_w + i*blockSize + (i-1)*inline_w
+        pygame.draw.line(surface, purple, (x, surface.get_rect().top) , (x, surface.get_rect().bottom))
+
+    for i in range(len(itemList)):
+        imgRect = itemList[i].get_rect()
+        imgRect.x = outline_w + i*(blockSize + inline_w)
+        imgRect.y = outline_w
+        surface.blit(itemList[i], imgRect)
 
 def drawGrid(surface, grid):
     # 회색 배경
-    pygame.draw.rect(surface, (160, 160, 160), (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
+    pygame.draw.rect(surface, gray, (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
 
     for i in range(0, grid_row - 2):
         y = 3 + i * (inline_w + blockSize)
@@ -177,11 +201,11 @@ def drawGrid(surface, grid):
             x = 3 + j * (inline_w + blockSize)
             pygame.draw.rect(surface, grid[i+1][j+1], (x, y, blockSize, blockSize))
 
-    pygame.draw.rect(surface, (180, 0, 180), (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
+    pygame.draw.rect(surface, purple, (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
 
 # grid는 한 칸에 표현할 색을 갖고있음.
 def createGrid():
-    grid = [[(0,0,0) for _ in range(grid_col)] for _ in range(grid_row)]
+    grid = [[black for _ in range(grid_col)] for _ in range(grid_row)]
     for i in range(grid_row):
         for j in range(grid_col):
             # TOP wall
@@ -218,6 +242,14 @@ def createNextBlockSurface(surface):
 
 def createHoldBlockSurface(surface):
     rect = surface.get_rect(w = holdBlockRect_w, h = holdBlockRect_h, center = (holdBlockRect_centerX, holdBlockRect_centerY))
+
+    return surface.subsurface(rect)
+
+def createItemSlotSurface(surface):
+    rectCenter = (screen_w/2, screen_h*8/9)
+    rectWidth = grid_w
+    rectHeight = blockSize + (2*outline_w)
+    rect = surface.get_rect(w = rectWidth, h = rectHeight, center = rectCenter)
 
     return surface.subsurface(rect)
 
@@ -291,7 +323,7 @@ def deleteLine(grid):
     for i in range(1, 21):
         delLine = False
         for j in range(1, 11):
-            if grid[i][j] != (0,0,0):
+            if grid[i][j] != black:
                 delLine = True
             else:
                 delLine = False
@@ -300,7 +332,7 @@ def deleteLine(grid):
         if delLine:
             count += 1
             for j in range(1,11):
-                grid[i][j] = (0,0,0)
+                grid[i][j] = black
             fillDeletedLine(grid, i)
     return count
 
@@ -329,7 +361,7 @@ def setGhostBlock(copiedGrid, currentBlock):
     return ghostBlock
 
 def updateBlockBoxSurface(surface, block):
-    pygame.draw.rect(surface, (100, 0, 100), (0, 0, nextBlockRect_w, nextBlockRect_w), outline_w)
+    pygame.draw.rect(surface, purple, (0, 0, nextBlockRect_w, nextBlockRect_w), outline_w)
     if block == None:
         return
 
@@ -351,17 +383,19 @@ def updateBlockBoxSurface(surface, block):
     drawBlockBox(surface.subsurface(rect), block.blockType, block.color)
 
 
-def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, grid, nextBlock, holdBlock, score):
-    surface.fill((0,0,0))
+def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, grid, nextBlock, holdBlock, itemList, score):
+    surface.fill(black)
 
     drawGrid(gridSurface, grid)
 
     updateBlockBoxSurface(nextBlockSurface, nextBlock)
     updateBlockBoxSurface(holdBlockSurface, holdBlock)
-    drawMessage(surface, "Ariel", 20, (150,150,0), (0,0,0), "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
-    drawMessage(surface, "Ariel", 20, (150,150,0), (0,0,0), "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
+    drawMessage(surface, "Ariel", 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
+    drawMessage(surface, "Ariel", 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
 
-    drawMessageCenter(surface, "Arial", 30, (255, 255, 255), (0, 0, 0), "SCORE : " + str(score), -360)
+    drawItemSlot(itemSlotSurface, itemList)
+
+    drawMessageCenter(surface, "Arial", 30, white, black, "SCORE : " + str(score), -360)
     pygame.display.flip()
 
 def gameStart(surface):
@@ -372,6 +406,7 @@ def gameStart(surface):
     gridSurface = createGridSurface(surface)
     nextBlockSurface = createNextBlockSurface(surface)
     holdBlockSurface = createHoldBlockSurface(surface)
+    itemSlotSurface = createItemSlotSurface(surface)
 
     currentBlock = getRandomBlock()
     ghostBlock = setGhostBlock(copiedGrid, currentBlock)
@@ -385,8 +420,10 @@ def gameStart(surface):
     drawBlock(copiedGrid, ghostValidPositions, ghostBlock.color)
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
+    itemList = [plus1Img]
+
     score = 0
-    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
+    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
 
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
@@ -523,11 +560,11 @@ def gameStart(surface):
             else:
                 score += delLineCount * 10 * comboStack
 
-        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, copiedGrid, nextBlock, holdBlock, score)
+        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
 
         if checkFinish(grid):
-            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Game Over! Gga Bi!")
-            drawMessageCenter(surface, "Arial", 40, (255, 255, 255), (40, 40, 40), "Press ESC to go to the menu", 50)
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over! Gga Bi!")
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to go to the menu", 50)
             pygame.display.flip()
             while run:
                 for event in pygame.event.get():
@@ -542,8 +579,8 @@ def menu(surface):
     run = True
 
     while run:
-        surface.fill((0,0,0)) # 메뉴 창 검정색 바탕
-        drawMessageCenter(surface, "Arial", 20, (255, 255, 255), (0, 0, 0),  "Press Any Key...")
+        surface.fill(black) # 메뉴 창 검정색 바탕
+        drawMessageCenter(surface, "Arial", 20, white, black,  "Press Any Key...")
 
         pygame.display.flip()
         for event in pygame.event.get():
@@ -557,8 +594,11 @@ def menu(surface):
 
     pygame.display.quit()
 
-
 surface = pygame.display.set_mode((screen_w, screen_h))
 pygame.display.set_caption('KiMiCa\'s Tetris')
+
+# image Load
+plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
+plus1Img = pygame.transform.scale(plus1Img, (30, 30))
 
 menu(surface)
