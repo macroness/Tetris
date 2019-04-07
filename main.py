@@ -176,10 +176,14 @@ def drawBlockBox(surface, blockType, color):
         pygame.draw.rect(surface, black, (43,22,21,21))
 
 def drawItemSlot(surface, itemList):
-    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().top) , (surface.get_rect().right, surface.get_rect().top), outline_w)
-    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().top) , (surface.get_rect().left, surface.get_rect().bottom), outline_w)
-    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().bottom - 1) , (surface.get_rect().right - 1, surface.get_rect().bottom - 1), outline_w)
-    pygame.draw.line(surface, purple, (surface.get_rect().right - 1, surface.get_rect().top) , (surface.get_rect().right - 1, surface.get_rect().bottom), outline_w)
+    # top
+    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().top + 1) , (surface.get_rect().right, surface.get_rect().top + 1), outline_w)
+    # left
+    pygame.draw.line(surface, purple, (surface.get_rect().left + 1, surface.get_rect().top) , (surface.get_rect().left + 1, surface.get_rect().bottom - 3), outline_w)
+    # bottom
+    pygame.draw.line(surface, purple, (surface.get_rect().left, surface.get_rect().bottom - 2) , (surface.get_rect().right, surface.get_rect().bottom - 2), outline_w)
+    # right
+    pygame.draw.line(surface, purple, (surface.get_rect().right - 2, surface.get_rect().top) , (surface.get_rect().right - 2, surface.get_rect().bottom - 3), outline_w)
 
     for i in range(1,10):
         x = outline_w + i*blockSize + (i-1)*inline_w
