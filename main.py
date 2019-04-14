@@ -198,10 +198,10 @@ def drawItemSlot(surface, itemList):
         pygame.draw.line(surface, purple, (x, surface.get_rect().top) , (x, surface.get_rect().bottom))
 
     for i in range(len(itemList)):
-        imgRect = itemList[i].get_rect()
+        imgRect = itemImgList[itemList[i][0]].get_rect()
         imgRect.x = outline_w + i*(blockSize + inline_w)
         imgRect.y = outline_w
-        surface.blit(itemList[i], imgRect)
+        surface.blit(itemImgList[itemList[i][0]], imgRect)
 
 def isItem(block):
     if 0 < block[0] and block[0] < 50 and block[1] == 0 and block[2] == 0:
@@ -276,8 +276,13 @@ def createItemSlotSurface(surface):
 
     return surface.subsurface(rect)
 
+def isWall(block):
+    if 0 < block[1] and block[1] < 5:
+        return True
+    return False
+
 def isBlock(block):
-    if block[0] < 50 and block[1] == 0 and block[2] == 0:
+    if (block[0] < 50 and block[1] == 0 and block[2] == 0) or isWall(block):
         return False
     return True
 
@@ -313,7 +318,7 @@ def checkConflict(grid, block, ignoreList = []):
                 retList.append(Conflict.LEFT)
             if (Conflict.RIGHT not in ignoreList) and (pixelColor == (4,4,4)):
                 retList.append(Conflict.RIGHT)
-            if pixelColor[0] > 4 or pixelColor[1] > 4 or pixelColor[2] > 4:
+            if isBlock(pixelColor) or isItem(pixelColor) :
                 retList.append(Conflict.BLOCK)
 
     return retList
@@ -362,7 +367,7 @@ def fillDeletedLine(grid, x):
     grid[0][0] = (3,3,3)
     grid[0][11] = (4,4,4)
 
-def deleteLine(grid):
+def deleteLine(grid, itemList):
     count = 0
     for i in range(1, 21):
         delLine = False
@@ -376,6 +381,8 @@ def deleteLine(grid):
         if delLine:
             count += 1
             for j in range(1,11):
+                if isItem(grid[i][j]):
+                    itemList.append(grid[i][j])
                 grid[i][j] = black
             fillDeletedLine(grid, i)
     return count
@@ -464,7 +471,7 @@ def gameStart(surface):
     drawBlock(copiedGrid, ghostValidPositions, ghostBlock.color)
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
-    itemList = [itemImgList[1]]
+    itemList = []
 
     score = 0
     updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
@@ -587,7 +594,7 @@ def gameStart(surface):
 
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
-            delLineCount = deleteLine(grid)
+            delLineCount = deleteLine(grid, itemList)
 
             if delLineCount > 0:
                 comboStack += 1
