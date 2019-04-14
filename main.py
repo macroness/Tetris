@@ -16,6 +16,14 @@ purple = (180,0,180)
 gray = (160,160,160)
 yellow = (150,150,0)
 
+# items
+# item의 이미지들을 담고있는 list (index 1부터 유효함)
+# item의 color 값에서 맨앞 숫자가 itemList의 인덱스임.
+itemImgList = []
+itemImgList.append(0)
+# item을 구분하기 위해 color 맵을 이용함
+plus1 = (1,0,0)
+
 screen_w = 700
 screen_h = 900
 
@@ -195,6 +203,11 @@ def drawItemSlot(surface, itemList):
         imgRect.y = outline_w
         surface.blit(itemList[i], imgRect)
 
+def isItem(block):
+    if 0 < block[0] and block[0] < 50 and block[1] == 0 and block[2] == 0:
+        return True
+    return False
+
 def drawGrid(surface, grid):
     # 회색 배경
     pygame.draw.rect(surface, gray, (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
@@ -203,11 +216,17 @@ def drawGrid(surface, grid):
         y = 3 + i * (inline_w + blockSize)
         for j in range(0, grid_col - 2):
             x = 3 + j * (inline_w + blockSize)
-            pygame.draw.rect(surface, grid[i+1][j+1], (x, y, blockSize, blockSize))
+            if isItem(grid[i+1][j+1]):
+                imgRect = itemImgList[grid[i+1][j+1][0]].get_rect()
+                imgRect.x = x
+                imgRect.y = y
+                surface.blit(itemImgList[grid[i+1][j+1][0]], imgRect)
+            else:
+                pygame.draw.rect(surface, grid[i+1][j+1], (x, y, blockSize, blockSize))
 
     pygame.draw.rect(surface, purple, (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
 
-# grid는 한 칸에 표현할 색을 갖고있음.
+# grid는 각 칸마다 색 또는 아이템을 표현하는 값을 갖고있음.
 def createGrid():
     grid = [[black for _ in range(grid_col)] for _ in range(grid_row)]
     for i in range(grid_row):
@@ -256,6 +275,27 @@ def createItemSlotSurface(surface):
     rect = surface.get_rect(w = rectWidth, h = rectHeight, center = rectCenter)
 
     return surface.subsurface(rect)
+
+def isBlock(block):
+    if block[0] < 50 and block[1] == 0 and block[2] == 0:
+        return False
+    return True
+
+def createItemInGrid(grid):
+    blockList = []
+
+    for i in range(1, grid_row - 1):
+        for j in range(1, grid_col - 1):
+            if isBlock(grid[i][j]):
+                blockList.append((i,j))
+
+    # item을 만들 블럭이 없다면 리턴
+    if len(blockList) == 0:
+        return
+
+    itemBlock = blockList[random.randrange(0, len(blockList))]
+    itemNum = random.randrange(1,len(itemImgList))
+    grid[itemBlock[0]][itemBlock[1]] = (itemNum, 0, 0)
 
 # 충돌한 위치를 반환.
 def checkConflict(grid, block, ignoreList = []):
@@ -424,7 +464,7 @@ def gameStart(surface):
     drawBlock(copiedGrid, ghostValidPositions, ghostBlock.color)
     drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
-    itemList = [plus1Img]
+    itemList = [itemImgList[1]]
 
     score = 0
     updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
@@ -555,6 +595,9 @@ def gameStart(surface):
                     tetrisComboStack += 1
                 else:
                     tetrisComboStack = 0
+                randNum = random.randrange(0,10)
+                if randNum > 0:
+                    createItemInGrid(grid)
             else:
                 comboStack = 0
 
@@ -604,5 +647,7 @@ pygame.display.set_caption('KiMiCa\'s Tetris')
 # image Load
 plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
 plus1Img = pygame.transform.scale(plus1Img, (30, 30))
+
+itemImgList.append(plus1Img)
 
 menu(surface)
