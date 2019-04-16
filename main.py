@@ -15,7 +15,7 @@ white = (255,255,255)
 purple = (180,0,180)
 gray = (160,160,160)
 yellow = (150,150,0)
-gray2 = (100,100,100)
+blueGray = (70,70,100)
 
 # items
 # item의 이미지들을 담고있는 list (index 1부터 유효함)
@@ -370,9 +370,9 @@ def fillDeletedLine(grid, x):
 
 def deleteLine(grid, itemList):
     count = 0
-    for i in range(1, 21):
+    for i in range(1, grid_row - 1):
         delLine = False
-        for j in range(1, 11):
+        for j in range(1, grid_col - 1):
             if grid[i][j] != black:
                 delLine = True
             else:
@@ -399,9 +399,6 @@ def getDroppedDistance(grid, block):
     return tmpBlock.x - block.x
 
 def checkFinish(grid, block):
-    #for i in range(1,11):
-    #    if grid[0][i] != (1,1,1):
-    #        return True
     return len(checkConflict(grid, block, [Conflict.TOP])) != 0
 
 def setGhostBlock(copiedGrid, currentBlock):
@@ -452,10 +449,20 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
 
 # item 함수들
 
-#def lineUp(grid, num):
-#    for 
+def lineUp(grid, num):
+    for i in range(1, grid_row - num - 1):
+        grid[i] = copy.deepcopy(grid[i+num])
 
+    randPosition = random.randrange(1, grid_col - 2)
+    for i in range(grid_row - 2, grid_row - 2 - num, -1 * num):
+        grid[i] = [blueGray for _ in range(grid_col)]
+        grid[i][randPosition] = black
+        grid[i][0] = (3,3,3)
+        grid[i][11] = (4,4,4)
 
+def useItem(grid, item):
+    if item[0] == 1:
+        lineUp(grid, 1)
 
 def gameStart(surface):
     run = True
@@ -588,9 +595,10 @@ def gameStart(surface):
                                 infinity = delayTime
                     else:
                         infinity = delayTime
-                #elif event.key == pygame.K_1:
-                    #if 0 < len(itemList):
-
+                elif event.key == pygame.K_1:
+                    if 0 < len(itemList):
+                        useItem(grid, itemList.pop(0))
+                        copiedGrid = copy.deepcopy(grid)
 
                 ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
