@@ -15,6 +15,7 @@ white = (255,255,255)
 purple = (180,0,180)
 gray = (160,160,160)
 yellow = (150,150,0)
+gray2 = (100,100,100)
 
 # items
 # item의 이미지들을 담고있는 list (index 1부터 유효함)
@@ -50,7 +51,7 @@ holdBlockRect_centerX = ((screen_w - grid_w) * 0.25) // 1
 holdBlockRect_centerY = nextBlockRect_centerY
 
 grid_col = 12
-grid_row = 22
+grid_row = 25
 
 # grid 시작 점 (x,y) 좌표 (왼쪽 위 꼭지점)
 grid_x = (screen_w - grid_w) // 2
@@ -75,7 +76,7 @@ class Conflict(enum.Enum):
     BLOCK = 5
 
 def getRandomBlock():
-    return Block(-2, 4, random.randrange(0, 7))
+    return Block(1, 4, random.randrange(0, 7))
 
 def drawSubsurface(surface, subsurface, centerX, centerY):
     rect = subsurface.get_rect()
@@ -212,17 +213,17 @@ def drawGrid(surface, grid):
     # 회색 배경
     pygame.draw.rect(surface, gray, (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
 
-    for i in range(0, grid_row - 2):
+    for i in range(0, grid_row - 5):
         y = 3 + i * (inline_w + blockSize)
         for j in range(0, grid_col - 2):
             x = 3 + j * (inline_w + blockSize)
-            if isItem(grid[i+1][j+1]):
-                imgRect = itemImgList[grid[i+1][j+1][0]].get_rect()
+            if isItem(grid[i+4][j+1]):
+                imgRect = itemImgList[grid[i+4][j+1][0]].get_rect()
                 imgRect.x = x
                 imgRect.y = y
-                surface.blit(itemImgList[grid[i+1][j+1][0]], imgRect)
+                surface.blit(itemImgList[grid[i+4][j+1][0]], imgRect)
             else:
-                pygame.draw.rect(surface, grid[i+1][j+1], (x, y, blockSize, blockSize))
+                pygame.draw.rect(surface, grid[i+4][j+1], (x, y, blockSize, blockSize))
 
     pygame.draw.rect(surface, purple, (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
 
@@ -308,7 +309,7 @@ def checkConflict(grid, block, ignoreList = []):
     retList = []
 
     for pos in positions:
-        if pos[0] >= 0 and pos[0] < 22 and pos[1] >= 0 and pos[1] < 12:
+        if pos[0] >= 0 and pos[0] < grid_row and pos[1] >= 0 and pos[1] < grid_col:
             pixelColor = grid[pos[0]][pos[1]]
             if (Conflict.TOP not in ignoreList) and (pixelColor == (1,1,1)):
                 retList.append(Conflict.TOP)
@@ -363,9 +364,9 @@ def checkLeftRotationConflict(grid, currentBlock):
 def fillDeletedLine(grid, x):
     for i in range(x, 1, -1):
         grid[i] = copy.deepcopy(grid[i - 1])
-    grid[0] = [(1,1,1) for _ in range(grid_col)]
-    grid[0][0] = (3,3,3)
-    grid[0][11] = (4,4,4)
+    grid[1] = [(0,0,0) for _ in range(grid_col)]
+    grid[1][0] = (3,3,3)
+    grid[1][11] = (4,4,4)
 
 def deleteLine(grid, itemList):
     count = 0
@@ -397,11 +398,11 @@ def getDroppedDistance(grid, block):
 
     return tmpBlock.x - block.x
 
-def checkFinish(grid):
-    for i in range(1,11):
-        if grid[0][i] != (1,1,1):
-            return True
-    return False
+def checkFinish(grid, block):
+    #for i in range(1,11):
+    #    if grid[0][i] != (1,1,1):
+    #        return True
+    return len(checkConflict(grid, block, [Conflict.TOP])) != 0
 
 def setGhostBlock(copiedGrid, currentBlock):
     ghostBlock = copy.deepcopy(currentBlock)
@@ -448,6 +449,13 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
 
     drawMessageCenter(surface, "Arial", 30, white, black, "SCORE : " + str(score), -360)
     pygame.display.flip()
+
+# item 함수들
+
+#def lineUp(grid, num):
+#    for 
+
+
 
 def gameStart(surface):
     run = True
@@ -580,6 +588,9 @@ def gameStart(surface):
                                 infinity = delayTime
                     else:
                         infinity = delayTime
+                #elif event.key == pygame.K_1:
+                    #if 0 < len(itemList):
+
 
                 ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
@@ -603,7 +614,8 @@ def gameStart(surface):
                 else:
                     tetrisComboStack = 0
                 randNum = random.randrange(0,10)
-                if randNum > 0:
+                # TODO : Test를 위해 아이템 생성률을 100%로 해둠. 나중에 적절한 수치로 수정해야함.
+                if randNum >= 0:
                     createItemInGrid(grid)
             else:
                 comboStack = 0
@@ -616,7 +628,7 @@ def gameStart(surface):
 
         updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
 
-        if checkFinish(grid):
+        if checkFinish(grid, currentBlock):
             drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over! Gga Bi!")
             drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to go to the menu", 50)
             pygame.display.flip()
