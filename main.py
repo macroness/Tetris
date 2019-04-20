@@ -24,6 +24,9 @@ itemImgList = []
 itemImgList.append(0)
 # item을 구분하기 위해 color 맵을 이용함
 plus1 = (1,0,0)
+plus2 = (2,0,0)
+minus1 = (3,0,0)
+minus2 = (4,0,0)
 
 screen_w = 700
 screen_h = 900
@@ -361,12 +364,14 @@ def checkLeftRotationConflict(grid, currentBlock):
             return False
     return True
 
-def fillDeletedLine(grid, x):
-    for i in range(x, 1, -1):
-        grid[i] = copy.deepcopy(grid[i - 1])
-    grid[1] = [(0,0,0) for _ in range(grid_col)]
-    grid[1][0] = (3,3,3)
-    grid[1][11] = (4,4,4)
+def fillDeletedLine(grid, x, num):
+    for i in range(x, num, -1):
+        grid[i] = copy.deepcopy(grid[i - num])
+
+    for i in range(1, num + 1):
+        grid[i] = [black for _ in range(grid_col)]
+        grid[i][0] = (3,3,3)
+        grid[i][11] = (4,4,4)
 
 def deleteLine(grid, itemList):
     count = 0
@@ -382,10 +387,10 @@ def deleteLine(grid, itemList):
         if delLine:
             count += 1
             for j in range(1,11):
-                if isItem(grid[i][j]):
+                if isItem(grid[i][j]) and len(itemList) < 10:
                     itemList.append(grid[i][j])
                 grid[i][j] = black
-            fillDeletedLine(grid, i)
+            fillDeletedLine(grid, i, 1)
     return count
 
 def getDroppedDistance(grid, block):
@@ -454,15 +459,24 @@ def lineUp(grid, num):
         grid[i] = copy.deepcopy(grid[i+num])
 
     randPosition = random.randrange(1, grid_col - 2)
-    for i in range(grid_row - 2, grid_row - 2 - num, -1 * num):
+    for i in range(grid_row - 2, grid_row - 2 - num, -1):
         grid[i] = [blueGray for _ in range(grid_col)]
         grid[i][randPosition] = black
         grid[i][0] = (3,3,3)
         grid[i][11] = (4,4,4)
 
+def lineDown(grid, num):
+    fillDeletedLine(grid, 23, num)
+
 def useItem(grid, item):
     if item[0] == 1:
         lineUp(grid, 1)
+    elif item[0] == 2:
+        lineUp(grid, 2)
+    elif item[0] == 3:
+        lineDown(grid,1)
+    elif item[0] == 4:
+        lineDown(grid,2)
 
 def gameStart(surface):
     run = True
@@ -674,7 +688,16 @@ pygame.display.set_caption('KiMiCa\'s Tetris')
 # image Load
 plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
 plus1Img = pygame.transform.scale(plus1Img, (30, 30))
+plus2Img = pygame.image.load(os.path.join('img', 'plus2.png')).convert()
+plus2Img = pygame.transform.scale(plus2Img, (30, 30))
+minus1Img = pygame.image.load(os.path.join('img', 'minus1.png')).convert()
+minus1Img = pygame.transform.scale(minus1Img, (30, 30))
+minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
+minus2Img = pygame.transform.scale(minus2Img, (30, 30))
 
 itemImgList.append(plus1Img)
+itemImgList.append(plus2Img)
+itemImgList.append(minus1Img)
+itemImgList.append(minus2Img)
 
 menu(surface)
