@@ -28,6 +28,7 @@ plus2 = (2,0,0)
 minus1 = (3,0,0)
 minus2 = (4,0,0)
 zigzag = (5,0,0)
+hole = (6,0,0)
 
 screen_w = 700
 screen_h = 900
@@ -483,6 +484,11 @@ def zigzagGrid(grid):
             grid[i][grid_col - 2] = black
         moveRight = not moveRight
 
+def holeGrid(grid):
+    for i in range(1, grid_row - 1):
+        for j in range(1 + (i%2),grid_col - 1, 2):
+            grid[i][j] = black
+
 def useItem(grid, item):
     if item[0] == 1:
         lineUp(grid, 1)
@@ -494,6 +500,8 @@ def useItem(grid, item):
         lineDown(grid,2)
     elif item[0] == 5:
         zigzagGrid(grid)
+    elif item[0] == 6:
+        holeGrid(grid)
 
 def gameStart(surface):
     run = True
@@ -713,11 +721,14 @@ minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
 minus2Img = pygame.transform.scale(minus2Img, (30, 30))
 zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
 zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
+hole2Img = pygame.image.load(os.path.join('img', 'hole.png')).convert()
+hole2Img = pygame.transform.scale(hole2Img, (30, 30))
 
 itemImgList.append(plus1Img)
 itemImgList.append(plus2Img)
 itemImgList.append(minus1Img)
 itemImgList.append(minus2Img)
 itemImgList.append(zigzag2Img)
+itemImgList.append(hole2Img)
 
 menu(surface)
