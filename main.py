@@ -27,6 +27,7 @@ plus1 = (1,0,0)
 plus2 = (2,0,0)
 minus1 = (3,0,0)
 minus2 = (4,0,0)
+zigzag = (5,0,0)
 
 screen_w = 700
 screen_h = 900
@@ -468,6 +469,20 @@ def lineUp(grid, num):
 def lineDown(grid, num):
     fillDeletedLine(grid, 23, num)
 
+def zigzagGrid(grid):
+    moveRight = False
+    for i in range(1, grid_row - 1):
+        for j in range(2,grid_col - 1):
+            if moveRight == True:
+                grid[i][j-1] = grid[i][j]
+            else:
+                grid[i][grid_col - j] = grid[i][grid_col - j - 1]
+        if moveRight == True:
+            grid[i][1] = black
+        else:
+            grid[i][grid_col - 2] = black
+        moveRight = not moveRight
+
 def useItem(grid, item):
     if item[0] == 1:
         lineUp(grid, 1)
@@ -477,6 +492,8 @@ def useItem(grid, item):
         lineDown(grid,1)
     elif item[0] == 4:
         lineDown(grid,2)
+    elif item[0] == 5:
+        zigzagGrid(grid)
 
 def gameStart(surface):
     run = True
@@ -694,10 +711,13 @@ minus1Img = pygame.image.load(os.path.join('img', 'minus1.png')).convert()
 minus1Img = pygame.transform.scale(minus1Img, (30, 30))
 minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
 minus2Img = pygame.transform.scale(minus2Img, (30, 30))
+zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
+zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
 
 itemImgList.append(plus1Img)
 itemImgList.append(plus2Img)
 itemImgList.append(minus1Img)
 itemImgList.append(minus2Img)
+itemImgList.append(zigzag2Img)
 
 menu(surface)
