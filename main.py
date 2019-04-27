@@ -9,6 +9,12 @@ from block import BlockType
 
 pygame.init()
 
+# TODO : UserState에 grid류도 다 넣자.
+class UserState:
+    def __init__(self):
+        self.reverseLR = False
+        return super().__init__()
+
 # colors
 black = (0,0,0)
 white = (255,255,255)
@@ -29,6 +35,7 @@ minus1 = (3,0,0)
 minus2 = (4,0,0)
 zigzag = (5,0,0)
 hole = (6,0,0)
+reverseLRItem = (1,0,0)
 
 screen_w = 700
 screen_h = 900
@@ -489,9 +496,10 @@ def holeGrid(grid):
         for j in range(1 + (i%2),grid_col - 1, 2):
             grid[i][j] = black
 
-def useItem(grid, item):
+def useItem(grid, item, userState):
     if item[0] == 1:
-        lineUp(grid, 1)
+        userState.reverseLR = True
+        #lineUp(grid, 1)
     elif item[0] == 2:
         lineUp(grid, 2)
     elif item[0] == 3:
@@ -502,6 +510,24 @@ def useItem(grid, item):
         zigzagGrid(grid)
     elif item[0] == 6:
         holeGrid(grid)
+    elif item[0] == 7:
+        userState.reverseLR = True
+
+def isRightInput(key, reversed):
+    if key == pygame.K_RIGHT and reversed == 0:
+        return True
+    if key == pygame.K_LEFT and reversed != 0:
+        return True
+
+    return False
+
+def isLeftInput(key, reversed):
+    if key == pygame.K_LEFT and reversed == 0:
+        return True
+    if key == pygame.K_RIGHT and reversed != 0:
+        return True
+
+    return False
 
 def gameStart(surface):
     run = True
@@ -541,9 +567,18 @@ def gameStart(surface):
     # 떨어지는 단계 시간 관리
     dropLevelTime = 0
     delayTime = 0
+    # infinity 초기화 시간
+    infinityMaxTime = 0.5
+
+    # keyChanger 지속 시간 관리
+    reverseLRTimer = 0
+    reverseLRMaxTime = 5
 
     comboStack = 0
     tetrisComboStack = 0
+
+    # 유저 상태
+    user1State = UserState()
 
     while run:
         clock.tick(gameFPS)
@@ -556,7 +591,7 @@ def gameStart(surface):
             currentBlock.x += 1
             if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                 currentBlock.x -= 1
-                if (delayTime - infinity) / 1000 > dropSpeed:
+                if (delayTime - infinity) / 1000 > infinityMaxTime:
                     droppedBlock = True
                     delayTime = 0
                     infinity = 0
@@ -567,6 +602,12 @@ def gameStart(surface):
         if (dropLevelTime / 1000) > levelUpTime:
             dropLevelTime = 0
             dropSpeed = dropSpeed * gravityMultiple
+
+        if reverseLRTimer != 0:
+            reverseLRTimer += clock.get_time()
+            if (reverseLRTimer / 1000) > reverseLRMaxTime:
+                reverseLRTimer = 0
+                user1State.reverseLR = False
 
         for event in pygame.event.get():
             if event.type == pygame.KEYDOWN:
@@ -595,13 +636,13 @@ def gameStart(surface):
                     if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                         currentBlock.x -= 1
                         droppedBlock = True
-                elif event.key == pygame.K_LEFT:
+                elif isLeftInput(event.key, reverseLRTimer):
                     currentBlock.y -= 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y += 1
                     else:
                         infinity = delayTime
-                elif event.key == pygame.K_RIGHT:
+                elif isRightInput(event.key, reverseLRTimer):
                     currentBlock.y += 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y -= 1
@@ -636,8 +677,10 @@ def gameStart(surface):
                         infinity = delayTime
                 elif event.key == pygame.K_1:
                     if 0 < len(itemList):
-                        useItem(grid, itemList.pop(0))
+                        useItem(grid, itemList.pop(0), user1State)
                         copiedGrid = copy.deepcopy(grid)
+                        if user1State.reverseLR == True:
+                            reverseLRTimer = delayTime
 
                 ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
@@ -723,12 +766,15 @@ zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
 zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
 hole2Img = pygame.image.load(os.path.join('img', 'hole.png')).convert()
 hole2Img = pygame.transform.scale(hole2Img, (30, 30))
+reverseLRItem2Img = pygame.image.load(os.path.join('img', 'reverseLRItem.png')).convert()
+reverseLRItem2Img = pygame.transform.scale(reverseLRItem2Img, (30, 30))
 
-itemImgList.append(plus1Img)
-itemImgList.append(plus2Img)
-itemImgList.append(minus1Img)
-itemImgList.append(minus2Img)
-itemImgList.append(zigzag2Img)
-itemImgList.append(hole2Img)
+#itemImgList.append(plus1Img)
+#itemImgList.append(plus2Img)
+#itemImgList.append(minus1Img)
+#itemImgList.append(minus2Img)
+#itemImgList.append(zigzag2Img)
+#itemImgList.append(hole2Img)
+itemImgList.append(reverseLRItem2Img)
 
 menu(surface)
