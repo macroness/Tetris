@@ -498,8 +498,7 @@ def holeGrid(grid):
 
 def useItem(grid, item, userState):
     if item[0] == 1:
-        userState.reverseLR = True
-        #lineUp(grid, 1)
+        lineUp(grid, 1)
     elif item[0] == 2:
         lineUp(grid, 2)
     elif item[0] == 3:
@@ -769,12 +768,12 @@ hole2Img = pygame.transform.scale(hole2Img, (30, 30))
 reverseLRItem2Img = pygame.image.load(os.path.join('img', 'reverseLRItem.png')).convert()
 reverseLRItem2Img = pygame.transform.scale(reverseLRItem2Img, (30, 30))
 
-#itemImgList.append(plus1Img)
-#itemImgList.append(plus2Img)
-#itemImgList.append(minus1Img)
-#itemImgList.append(minus2Img)
-#itemImgList.append(zigzag2Img)
-#itemImgList.append(hole2Img)
+itemImgList.append(plus1Img)
+itemImgList.append(plus2Img)
+itemImgList.append(minus1Img)
+itemImgList.append(minus2Img)
+itemImgList.append(zigzag2Img)
+itemImgList.append(hole2Img)
 itemImgList.append(reverseLRItem2Img)
 
 menu(surface)
