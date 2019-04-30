@@ -9,6 +9,12 @@ from block import BlockType
 
 pygame.init()
 
+screen_w = 700
+screen_h = 900
+
+surface = pygame.display.set_mode((screen_w, screen_h))
+pygame.display.set_caption('KiMiCa\'s Tetris')
+
 # TODO : UserState에 grid류도 다 넣자.
 class UserState:
     def __init__(self):
@@ -28,6 +34,35 @@ blueGray = (70,70,100)
 # item의 color 값에서 맨앞 숫자가 itemList의 인덱스임.
 itemImgList = []
 itemImgList.append(0)
+
+# item image load
+plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
+plus1Img = pygame.transform.scale(plus1Img, (30, 30))
+plus2Img = pygame.image.load(os.path.join('img', 'plus2.png')).convert()
+plus2Img = pygame.transform.scale(plus2Img, (30, 30))
+minus1Img = pygame.image.load(os.path.join('img', 'minus1.png')).convert()
+minus1Img = pygame.transform.scale(minus1Img, (30, 30))
+minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
+minus2Img = pygame.transform.scale(minus2Img, (30, 30))
+zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
+zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
+hole2Img = pygame.image.load(os.path.join('img', 'hole.png')).convert()
+hole2Img = pygame.transform.scale(hole2Img, (30, 30))
+reverseLRItem2Img = pygame.image.load(os.path.join('img', 'reverseLRItem.png')).convert()
+reverseLRItem2Img = pygame.transform.scale(reverseLRItem2Img, (30, 30))
+
+# item의 이미지들을 담고있는 list (index 1부터 유효함)
+# item의 color 값에서 맨앞 숫자가 itemList의 인덱스임.
+itemImgList = []
+itemImgList.append(0)
+itemImgList.append(plus1Img)
+itemImgList.append(plus2Img)
+itemImgList.append(minus1Img)
+itemImgList.append(minus2Img)
+itemImgList.append(zigzag2Img)
+itemImgList.append(hole2Img)
+itemImgList.append(reverseLRItem2Img)
+
 # item을 구분하기 위해 color 맵을 이용함
 plus1 = (1,0,0)
 plus2 = (2,0,0)
@@ -36,9 +71,6 @@ minus2 = (4,0,0)
 zigzag = (5,0,0)
 hole = (6,0,0)
 reverseLRItem = (1,0,0)
-
-screen_w = 700
-screen_h = 900
 
 blockSize = 30
 nextBlockSize = 20
@@ -498,7 +530,8 @@ def holeGrid(grid):
 
 def useItem(grid, item, userState):
     if item[0] == 1:
-        lineUp(grid, 1)
+        userState.reverseLR = True
+        #lineUp(grid, 1)
     elif item[0] == 2:
         lineUp(grid, 2)
     elif item[0] == 3:
@@ -748,32 +781,5 @@ def menu(surface):
                 gameStart(surface)
 
     pygame.display.quit()
-
-surface = pygame.display.set_mode((screen_w, screen_h))
-pygame.display.set_caption('KiMiCa\'s Tetris')
-
-# image Load
-plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
-plus1Img = pygame.transform.scale(plus1Img, (30, 30))
-plus2Img = pygame.image.load(os.path.join('img', 'plus2.png')).convert()
-plus2Img = pygame.transform.scale(plus2Img, (30, 30))
-minus1Img = pygame.image.load(os.path.join('img', 'minus1.png')).convert()
-minus1Img = pygame.transform.scale(minus1Img, (30, 30))
-minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
-minus2Img = pygame.transform.scale(minus2Img, (30, 30))
-zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
-zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
-hole2Img = pygame.image.load(os.path.join('img', 'hole.png')).convert()
-hole2Img = pygame.transform.scale(hole2Img, (30, 30))
-reverseLRItem2Img = pygame.image.load(os.path.join('img', 'reverseLRItem.png')).convert()
-reverseLRItem2Img = pygame.transform.scale(reverseLRItem2Img, (30, 30))
-
-itemImgList.append(plus1Img)
-itemImgList.append(plus2Img)
-itemImgList.append(minus1Img)
-itemImgList.append(minus2Img)
-itemImgList.append(zigzag2Img)
-itemImgList.append(hole2Img)
-itemImgList.append(reverseLRItem2Img)
 
 menu(surface)
