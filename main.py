@@ -21,6 +21,25 @@ class UserState:
         self.reverseLR = False
         return super().__init__()
 
+# menu imageList
+# index 0   : 현재 선택된 menu의 index
+# index 1 ~ : 각 메뉴의 img들
+menuImgList = []
+
+# menu images
+selectedGameStartImg = pygame.image.load(os.path.join('img', 'selectedGameStart.png')).convert()
+selectedGameStartImg = pygame.transform.scale(selectedGameStartImg, (301, 60))
+unselectedGameStartImg = pygame.image.load(os.path.join('img', 'unselectedGameStart.png')).convert()
+unselectedGameStartImg = pygame.transform.scale(unselectedGameStartImg, (301, 60))
+selectedGameFinishImg = pygame.image.load(os.path.join('img', 'selectedGameFinish.png')).convert()
+selectedGameFinishImg = pygame.transform.scale(selectedGameFinishImg, (301, 60))
+unselectedGameFinishImg = pygame.image.load(os.path.join('img', 'unselectedGameFinish.png')).convert()
+unselectedGameFinishImg = pygame.transform.scale(unselectedGameFinishImg, (301, 60))
+selectedOpInfoImg = pygame.image.load(os.path.join('img', 'selectedOpInfo.png')).convert()
+selectedOpInfoImg = pygame.transform.scale(selectedOpInfoImg, (301, 60))
+unselectedOpInfoImg = pygame.image.load(os.path.join('img', 'unselectedOpInfo.png')).convert()
+unselectedOpInfoImg = pygame.transform.scale(unselectedOpInfoImg, (301, 60))
+
 # colors
 black = (0,0,0)
 white = (255,255,255)
@@ -764,6 +783,12 @@ def gameStart(surface):
 
 def menu(surface):
     run = True
+
+    # menu 초기 설정
+    menuImgList.append(1)
+    menuImgList.append(selectedGameStartImg)
+    menuImgList.append(unselectedOpInfoImg)
+    menuImgList.append(unselectedGameFinishImg)
 
     while run:
         surface.fill(black) # 메뉴 창 검정색 바탕
