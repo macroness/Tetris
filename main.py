@@ -530,8 +530,7 @@ def holeGrid(grid):
 
 def useItem(grid, item, userState):
     if item[0] == 1:
-        userState.reverseLR = True
-        #lineUp(grid, 1)
+        lineUp(grid, 1)
     elif item[0] == 2:
         lineUp(grid, 2)
     elif item[0] == 3:
