@@ -745,7 +745,6 @@ def gameStart(surface):
 
         if droppedBlock:
             currentBlock = nextBlock
-            ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
@@ -769,6 +768,9 @@ def gameStart(surface):
                 score += delLineCount * 10 * 2 * comboStack * tetrisComboStack
             else:
                 score += delLineCount * 10 * comboStack
+
+            ghostBlock = setGhostBlock(grid, currentBlock)
+
 
         updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
 
