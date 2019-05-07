@@ -125,7 +125,7 @@ grid_x = (screen_w - grid_w) // 2
 grid_y = (screen_h - grid_h) // 2
 
 # 초당 프레임
-gameFPS = 60
+gameFPS = 50
 clock = pygame.time.Clock()
 
 # 중력 레벨업 되는 시간
@@ -613,7 +613,7 @@ def gameStart(surface):
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
-    pygame.key.set_repeat(200, 50)
+    pygame.key.set_repeat(200, 30)
     # 최초 2초에 한칸!
     dropSpeed = 2
     # 떨어지는 시간 관리
@@ -833,7 +833,7 @@ def menu(surface):
 
     while run:
         updateMenuScreen(surface)
-
+        pygame.time.delay(100)
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
