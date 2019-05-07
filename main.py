@@ -40,6 +40,10 @@ selectedOpInfoImg = pygame.transform.scale(selectedOpInfoImg, (301, 60))
 unselectedOpInfoImg = pygame.image.load(os.path.join('img', 'unselectedOpInfo.png')).convert()
 unselectedOpInfoImg = pygame.transform.scale(unselectedOpInfoImg, (301, 60))
 
+# operation Information page image
+opInfoImg = pygame.image.load(os.path.join('img', 'operationInfoPage.png')).convert()
+#opInfoImg = pygame.transform.scale(unselectedOpInfoImg, (576, 575))
+
 # colors
 black = (0,0,0)
 white = (255,255,255)
@@ -781,6 +785,43 @@ def gameStart(surface):
 
         copiedGrid = copy.deepcopy(grid)
 
+def updateMenuScreen(surface):
+    surface.fill(black) # 메뉴 창 검정색 바탕
+    
+    drawSubsurfaceCenter(surface, menuImgList[1], 0, -70)
+    drawSubsurfaceCenter(surface, menuImgList[2], 0, 0)
+    drawSubsurfaceCenter(surface, menuImgList[3], 0, 70)
+
+    pygame.display.flip()
+
+def changeSelectedMenu():
+    if menuImgList[0] == 1:
+        menuImgList[1] = selectedGameStartImg
+        menuImgList[2] = unselectedOpInfoImg
+        menuImgList[3] = unselectedGameFinishImg
+    elif menuImgList[0] == 2:
+        menuImgList[1] = unselectedGameStartImg
+        menuImgList[2] = selectedOpInfoImg
+        menuImgList[3] = unselectedGameFinishImg
+    elif menuImgList[0] == 3:
+        menuImgList[1] = unselectedGameStartImg
+        menuImgList[2] = unselectedOpInfoImg
+        menuImgList[3] = selectedGameFinishImg
+
+def operationInfoPage(surface):
+    surface.fill(black)
+    drawSubsurfaceCenter(surface, opInfoImg)
+
+    pygame.display.flip()
+
+    while True:
+        pygame.time.delay(100)
+        for event in pygame.event.get():
+            if event.type == pygame.QUIT:
+                return
+            if event.type == pygame.KEYDOWN:
+                return
+
 def menu(surface):
     run = True
 
@@ -791,10 +832,8 @@ def menu(surface):
     menuImgList.append(unselectedGameFinishImg)
 
     while run:
-        surface.fill(black) # 메뉴 창 검정색 바탕
-        drawMessageCenter(surface, "Arial", 20, white, black,  "Press Any Key...")
+        updateMenuScreen(surface)
 
-        pygame.display.flip()
         for event in pygame.event.get():
             if event.type == pygame.QUIT:
                 run = False
@@ -802,7 +841,25 @@ def menu(surface):
                 if event.key == pygame.K_ESCAPE:
                     run = False
                     break
-                gameStart(surface)
+                elif event.key == pygame.K_RETURN:
+                    if menuImgList[0] == 1:
+                        gameStart(surface)
+                    elif menuImgList[0] == 3:
+                        run = False
+                        break
+                    elif menuImgList[0] == 2:
+                        operationInfoPage(surface)
+                elif event.key == pygame.K_DOWN:
+                    menuImgList[0] = menuImgList[0] + 1
+                    if menuImgList[0] == 4:
+                        menuImgList[0] = 1
+                    changeSelectedMenu()
+                elif event.key == pygame.K_UP:
+                    menuImgList[0] = menuImgList[0] - 1
+                    if menuImgList[0] == 0:
+                        menuImgList[0] = 3
+                    changeSelectedMenu()
+
 
     pygame.display.quit()
 
