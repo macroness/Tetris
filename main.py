@@ -27,10 +27,14 @@ class UserState:
 menuImgList = []
 
 # menu images
-selectedGameStartImg = pygame.image.load(os.path.join('img', 'selectedGameStart.png')).convert()
-selectedGameStartImg = pygame.transform.scale(selectedGameStartImg, (301, 60))
-unselectedGameStartImg = pygame.image.load(os.path.join('img', 'unselectedGameStart.png')).convert()
-unselectedGameStartImg = pygame.transform.scale(unselectedGameStartImg, (301, 60))
+selectedNormalModePlayImg = pygame.image.load(os.path.join('img', 'selectedNormalModePlay.png')).convert()
+selectedNormalModePlayImg = pygame.transform.scale(selectedNormalModePlayImg, (301, 60))
+unselectedNormalModePlayImg = pygame.image.load(os.path.join('img', 'unselectedNormalModePlay.png')).convert()
+unselectedNormalModePlayImg = pygame.transform.scale(unselectedNormalModePlayImg, (301, 60))
+selectedMarathonModePlayImg = pygame.image.load(os.path.join('img', 'selectedMarathonModePlay.png')).convert()
+selectedMarathonModePlayImg = pygame.transform.scale(selectedMarathonModePlayImg, (301, 60))
+unselectedMarathonModePlayImg = pygame.image.load(os.path.join('img', 'unselectedMarathonModePlay.png')).convert()
+unselectedMarathonModePlayImg = pygame.transform.scale(unselectedMarathonModePlayImg, (301, 60))
 selectedGameFinishImg = pygame.image.load(os.path.join('img', 'selectedGameFinish.png')).convert()
 selectedGameFinishImg = pygame.transform.scale(selectedGameFinishImg, (301, 60))
 unselectedGameFinishImg = pygame.image.load(os.path.join('img', 'unselectedGameFinish.png')).convert()
@@ -40,9 +44,19 @@ selectedOpInfoImg = pygame.transform.scale(selectedOpInfoImg, (301, 60))
 unselectedOpInfoImg = pygame.image.load(os.path.join('img', 'unselectedOpInfo.png')).convert()
 unselectedOpInfoImg = pygame.transform.scale(unselectedOpInfoImg, (301, 60))
 
+#menu explain images
+normalModeExplainImg =  pygame.image.load(os.path.join('img', 'normalModeExplain.png')).convert()
+normalModeExplainImg = pygame.transform.scale(normalModeExplainImg, (250, 50))
+marathonModeExplainImg =  pygame.image.load(os.path.join('img', 'marathonModeExplain.png')).convert()
+marathonModeExplainImg = pygame.transform.scale(marathonModeExplainImg, (250, 50))
+operationExplainImg =  pygame.image.load(os.path.join('img', 'operationExplain.png')).convert()
+operationExplainImg = pygame.transform.scale(operationExplainImg, (250, 50))
+finishExplainImg =  pygame.image.load(os.path.join('img', 'finishExplain.png')).convert()
+finishExplainImg = pygame.transform.scale(finishExplainImg, (250, 50))
+
 # operation Information page image
 opInfoImg = pygame.image.load(os.path.join('img', 'operationInfoPage.png')).convert()
-#opInfoImg = pygame.transform.scale(unselectedOpInfoImg, (576, 575))
+opInfoImg = pygame.transform.scale(opInfoImg, (644, 600))
 
 # colors
 black = (0,0,0)
@@ -125,11 +139,11 @@ grid_x = (screen_w - grid_w) // 2
 grid_y = (screen_h - grid_h) // 2
 
 # 초당 프레임
-gameFPS = 50
+gameFPS = 60
 clock = pygame.time.Clock()
 
 # 중력 레벨업 되는 시간
-levelUpTime = 10
+defaultLevelUpTime = 10
 
 # 중력 레벨업시 배수
 gravityMultiple = 0.7
@@ -437,7 +451,7 @@ def fillDeletedLine(grid, x, num):
         grid[i][0] = (3,3,3)
         grid[i][11] = (4,4,4)
 
-def deleteLine(grid, itemList):
+def deleteLine(grid, itemList, isNoitem):
     count = 0
     for i in range(1, grid_row - 1):
         delLine = False
@@ -450,10 +464,11 @@ def deleteLine(grid, itemList):
 
         if delLine:
             count += 1
-            for j in range(1,11):
-                if isItem(grid[i][j]) and len(itemList) < 10:
-                    itemList.append(grid[i][j])
-                grid[i][j] = black
+            if isNoitem == False:
+                for j in range(1,11):
+                    if isItem(grid[i][j]) and len(itemList) < 10:
+                        itemList.append(grid[i][j])
+                    grid[i][j] = black
             fillDeletedLine(grid, i, 1)
     return count
 
@@ -501,7 +516,7 @@ def updateBlockBoxSurface(surface, block):
     drawBlockBox(surface.subsurface(rect), block.blockType, block.color)
 
 
-def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, grid, nextBlock, holdBlock, itemList, score):
+def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, grid, nextBlock, holdBlock, itemList, score, isNoitem):
     surface.fill(black)
 
     drawGrid(gridSurface, grid)
@@ -511,7 +526,8 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
     drawMessage(surface, "Ariel", 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
     drawMessage(surface, "Ariel", 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
 
-    drawItemSlot(itemSlotSurface, itemList)
+    if isNoitem == False:
+        drawItemSlot(itemSlotSurface, itemList)
 
     drawMessageCenter(surface, "Arial", 30, white, black, "SCORE : " + str(score), -360)
     pygame.display.flip()
@@ -583,7 +599,7 @@ def isLeftInput(key, reversed):
 
     return False
 
-def gameStart(surface):
+def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
     run = True
     grid = createGrid()
     copiedGrid = copy.deepcopy(grid)
@@ -608,21 +624,22 @@ def gameStart(surface):
     itemList = []
 
     score = 0
-    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
+    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
 
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
     pygame.key.set_repeat(200, 30)
-    # 최초 2초에 한칸!
-    dropSpeed = 2
+
+    # 전체 게임 플레이 시간 관리
+    totalPlayTime = 0
     # 떨어지는 시간 관리
     dropTime = 0
     # 떨어지는 단계 시간 관리
     dropLevelTime = 0
     delayTime = 0
     # infinity 초기화 시간
-    infinityMaxTime = 0.5
+    infinityMaxTime = 0.3
 
     # keyChanger 지속 시간 관리
     reverseLRTimer = 0
@@ -634,12 +651,25 @@ def gameStart(surface):
     # 유저 상태
     user1State = UserState()
 
+    isFinish = False
+
+    # 시간 한 번 초기화
+    clock.tick(10)
     while run:
-        clock.tick(gameFPS)
+        clock.tick(10)
         droppedBlock = False
         # 1/1000 sec
         delayTime += clock.get_time()
         dropLevelTime += clock.get_time()
+        totalPlayTime += clock.get_time()
+
+        print("dlyt : " + str(delayTime))
+        print("dlt  : " + str(dropLevelTime))
+        print("ttpt : " + str(totalPlayTime))
+        if limitTime != 0 and (totalPlayTime / 1000) >= limitTime:
+            print("totalPlayTime : " + str(totalPlayTime))
+            print("limitTime : " + str(limitTime))
+            isFinish = True
 
         if (delayTime / 1000) > dropSpeed:
             currentBlock.x += 1
@@ -653,7 +683,8 @@ def gameStart(surface):
                 delayTime = 0
                 infinity = 0
 
-        if (dropLevelTime / 1000) > levelUpTime:
+        # levelUpTime == 0 이면 레벨업 하지 않음.(싱글 모드)
+        if levelUpTime != 0 and (dropLevelTime / 1000) > levelUpTime:
             dropLevelTime = 0
             dropSpeed = dropSpeed * gravityMultiple
 
@@ -730,11 +761,12 @@ def gameStart(surface):
                     else:
                         infinity = delayTime
                 elif event.key == pygame.K_1:
-                    if 0 < len(itemList):
-                        useItem(grid, itemList.pop(0), user1State)
-                        copiedGrid = copy.deepcopy(grid)
-                        if user1State.reverseLR == True:
-                            reverseLRTimer = delayTime
+                    if isNoItem == False:
+                        if 0 < len(itemList):
+                            useItem(grid, itemList.pop(0), user1State)
+                            copiedGrid = copy.deepcopy(grid)
+                            if user1State.reverseLR == True:
+                                reverseLRTimer = delayTime
 
                 ghostBlock = setGhostBlock(copiedGrid, currentBlock)
 
@@ -748,7 +780,7 @@ def gameStart(surface):
 
             nextBlock = getRandomBlock()
             grid = copy.deepcopy(copiedGrid)
-            delLineCount = deleteLine(grid, itemList)
+            delLineCount = deleteLine(grid, itemList, isNoItem)
 
             if delLineCount > 0:
                 comboStack += 1
@@ -756,10 +788,11 @@ def gameStart(surface):
                     tetrisComboStack += 1
                 else:
                     tetrisComboStack = 0
-                randNum = random.randrange(0,10)
-                # TODO : Test를 위해 아이템 생성률을 100%로 해둠. 나중에 적절한 수치로 수정해야함.
-                if randNum >= 0:
-                    createItemInGrid(grid)
+                if isNoItem == False:
+                    randNum = random.randrange(0,10)
+                    # TODO : Test를 위해 아이템 생성률을 100%로 해둠. 나중에 적절한 수치로 수정해야함.
+                    if randNum >= 0:
+                        createItemInGrid(grid)
             else:
                 comboStack = 0
 
@@ -772,13 +805,22 @@ def gameStart(surface):
             ghostBlock = setGhostBlock(grid, currentBlock)
 
 
-        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score)
+        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
 
-        if checkFinish(grid, currentBlock):
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over! Gga Bi!")
+        if isFinish or checkFinish(grid, currentBlock):
+
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over!")
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Please wait 3 seconds", 50)
+
+            pygame.display.flip()
+            pygame.time.delay(3000)
+
+            surface.fill(black)
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Your Score : " + str(score))
             drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to go to the menu", 50)
             pygame.display.flip()
             while run:
+                pygame.time.delay(100)
                 for event in pygame.event.get():
                     if event.type == pygame.KEYDOWN:
                         if event.key == pygame.K_ESCAPE:
@@ -790,25 +832,34 @@ def gameStart(surface):
 def updateMenuScreen(surface):
     surface.fill(black) # 메뉴 창 검정색 바탕
     
-    drawSubsurfaceCenter(surface, menuImgList[1], 0, -70)
-    drawSubsurfaceCenter(surface, menuImgList[2], 0, 0)
-    drawSubsurfaceCenter(surface, menuImgList[3], 0, 70)
+    drawSubsurfaceCenter(surface, menuImgList[1], 0, -100)
+    drawSubsurfaceCenter(surface, menuImgList[2], 0, -33)
+    drawSubsurfaceCenter(surface, menuImgList[3], 0, 33)
+    drawSubsurfaceCenter(surface, menuImgList[4], 0, 100)
 
     pygame.display.flip()
 
 def changeSelectedMenu():
     if menuImgList[0] == 1:
-        menuImgList[1] = selectedGameStartImg
-        menuImgList[2] = unselectedOpInfoImg
-        menuImgList[3] = unselectedGameFinishImg
-    elif menuImgList[0] == 2:
-        menuImgList[1] = unselectedGameStartImg
-        menuImgList[2] = selectedOpInfoImg
-        menuImgList[3] = unselectedGameFinishImg
+        menuImgList[1] = selectedNormalModePlayImg
+        menuImgList[2] = unselectedMarathonModePlayImg
+        menuImgList[3] = unselectedOpInfoImg
+        menuImgList[4] = unselectedGameFinishImg
+    if menuImgList[0] == 2:
+        menuImgList[1] = unselectedNormalModePlayImg
+        menuImgList[2] = selectedMarathonModePlayImg
+        menuImgList[3] = unselectedOpInfoImg
+        menuImgList[4] = unselectedGameFinishImg
     elif menuImgList[0] == 3:
-        menuImgList[1] = unselectedGameStartImg
-        menuImgList[2] = unselectedOpInfoImg
-        menuImgList[3] = selectedGameFinishImg
+        menuImgList[1] = unselectedNormalModePlayImg
+        menuImgList[2] = unselectedMarathonModePlayImg
+        menuImgList[3] = selectedOpInfoImg
+        menuImgList[4] = unselectedGameFinishImg
+    elif menuImgList[0] == 4:
+        menuImgList[1] = unselectedNormalModePlayImg
+        menuImgList[2] = unselectedMarathonModePlayImg
+        menuImgList[3] = unselectedOpInfoImg
+        menuImgList[4] = selectedGameFinishImg
 
 def operationInfoPage(surface):
     surface.fill(black)
@@ -829,7 +880,8 @@ def menu(surface):
 
     # menu 초기 설정
     menuImgList.append(1)
-    menuImgList.append(selectedGameStartImg)
+    menuImgList.append(selectedNormalModePlayImg)
+    menuImgList.append(unselectedMarathonModePlayImg)
     menuImgList.append(unselectedOpInfoImg)
     menuImgList.append(unselectedGameFinishImg)
 
@@ -845,21 +897,23 @@ def menu(surface):
                     break
                 elif event.key == pygame.K_RETURN:
                     if menuImgList[0] == 1:
-                        gameStart(surface)
+                        gameStart(surface, 1, 0, 30, True)
+                    elif menuImgList[0] == 2:
+                        gameStart(surface, 1, 0, 0, True);
                     elif menuImgList[0] == 3:
+                        operationInfoPage(surface)
+                    elif menuImgList[0] == 4:
                         run = False
                         break
-                    elif menuImgList[0] == 2:
-                        operationInfoPage(surface)
                 elif event.key == pygame.K_DOWN:
                     menuImgList[0] = menuImgList[0] + 1
-                    if menuImgList[0] == 4:
+                    if menuImgList[0] == len(menuImgList):
                         menuImgList[0] = 1
                     changeSelectedMenu()
                 elif event.key == pygame.K_UP:
                     menuImgList[0] = menuImgList[0] - 1
                     if menuImgList[0] == 0:
-                        menuImgList[0] = 3
+                        menuImgList[0] = len(menuImgList) - 1
                     changeSelectedMenu()
 
 
