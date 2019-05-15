@@ -654,21 +654,16 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
     isFinish = False
 
     # 시간 한 번 초기화
-    clock.tick(10)
+    clock.tick(gameFPS)
     while run:
-        clock.tick(10)
+        clock.tick(gameFPS)
         droppedBlock = False
         # 1/1000 sec
         delayTime += clock.get_time()
         dropLevelTime += clock.get_time()
         totalPlayTime += clock.get_time()
 
-        print("dlyt : " + str(delayTime))
-        print("dlt  : " + str(dropLevelTime))
-        print("ttpt : " + str(totalPlayTime))
         if limitTime != 0 and (totalPlayTime / 1000) >= limitTime:
-            print("totalPlayTime : " + str(totalPlayTime))
-            print("limitTime : " + str(limitTime))
             isFinish = True
 
         if (delayTime / 1000) > dropSpeed:
@@ -736,6 +731,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                 elif event.key == pygame.K_UP:
                     currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                     conflictTypeList = checkConflict(grid, currentBlock,[Conflict.TOP])
+
                     if len(conflictTypeList) != 0:
                         if Conflict.LEFT in conflictTypeList:
                             if checkLeftRotationConflict(grid, currentBlock):
