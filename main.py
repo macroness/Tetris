@@ -19,7 +19,13 @@ pygame.display.set_caption('KiMiCa\'s Tetris')
 class UserState:
     def __init__(self):
         self.reverseLR = False
+        self.changeBgm()
         return super().__init__()
+
+    def changeBgm(self):
+        num = random.randrange(0, len(bgmPathList))
+        pygame.mixer.music.load(bgmPathList[num])
+        pygame.mixer.music.play()
 
 # menu imageList
 # index 0   : 현재 선택된 menu의 index
@@ -108,6 +114,27 @@ minus2 = (4,0,0)
 zigzag = (5,0,0)
 hole = (6,0,0)
 reverseLRItem = (1,0,0)
+
+# Sound
+pygame.mixer.init()
+
+# bgm
+bgmPathList = []
+bgmPathList.append(os.path.join('bgm', 'Butchers.mp3'))
+bgmPathList.append(os.path.join('bgm', 'Arms_Dealer.mp3'))
+bgmPathList.append(os.path.join('bgm', 'OK_POP_KO.mp3'))
+bgmPathList.append(os.path.join('bgm', 'I_m_Happy_For_This_Guitar.mp3'))
+bgmPathList.append(os.path.join('bgm', 'Always_Be_My_Unicorn.mp3'))
+bgmPathList.append(os.path.join('bgm', 'How_it_Began.mp3'))
+bgmPathList.append(os.path.join('bgm', 'We_Share_This.mp3'))
+
+# sound effect
+blockDeletedSoundPath = os.path.join('sounds', 'blockDeletedSound.mp3')
+blockDropSoundPath = os.path.join('sounds', 'blockDropSound.mp3')
+blockMoveSoundPath = os.path.join('sounds', 'blockMoveSound.mp3')
+blockRotationSoundPath = os.path.join('sounds', 'blockRotationSound.mp3')
+swapSoundPath = os.path.join('sounds', 'swapSound.mp3')
+tetrisSoundPath = os.path.join('sounds', 'tetrisSound.mp3')
 
 blockSize = 30
 nextBlockSize = 20
