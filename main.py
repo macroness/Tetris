@@ -3,6 +3,8 @@ import random
 import copy
 import enum
 import os
+import wave
+import pyaudio
 
 from block import Block
 from block import BlockType
@@ -129,12 +131,92 @@ bgmPathList.append(os.path.join('bgm', 'How_it_Began.mp3'))
 bgmPathList.append(os.path.join('bgm', 'We_Share_This.mp3'))
 
 # sound effect
-blockDeletedSoundPath = os.path.join('sounds', 'blockDeletedSound.mp3')
-blockDropSoundPath = os.path.join('sounds', 'blockDropSound.mp3')
-blockMoveSoundPath = os.path.join('sounds', 'blockMoveSound.mp3')
-blockRotationSoundPath = os.path.join('sounds', 'blockRotationSound.mp3')
-swapSoundPath = os.path.join('sounds', 'swapSound.mp3')
-tetrisSoundPath = os.path.join('sounds', 'tetrisSound.mp3')
+
+pyAudioObj = pyaudio.PyAudio()
+
+def callbackBlockDeletedSound(in_data, frame_count, time_info, status):
+    data = blockDeletedSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+blockDeletedSoundWave = wave.open(os.path.join('sounds', 'blockDeletedSound.wav'), 'rb')
+blockDeletedSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDeletedSoundWave.getsampwidth()),
+                channels=blockDeletedSoundWave.getnchannels(),
+                rate=blockDeletedSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackBlockDeletedSound)
+
+def callbackBlockDropSound(in_data, frame_count, time_info, status):
+    data = blockDropSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+blockDropSoundWave = wave.open(os.path.join('sounds', 'blockDropSound.wav'), 'rb')
+blockDropSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDropSoundWave.getsampwidth()),
+                channels=blockDropSoundWave.getnchannels(),
+                rate=blockDropSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackBlockDropSound)
+
+def callbackBlockDownSound(in_data, frame_count, time_info, status):
+    data = blockDownSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+blockDownSoundWave = wave.open(os.path.join('sounds', 'blockDownSound.wav'), 'rb')
+blockDownSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDownSoundWave.getsampwidth()),
+                channels=blockDownSoundWave.getnchannels(),
+                rate=blockDownSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackBlockDownSound)
+
+def callbackBlockMoveSound(in_data, frame_count, time_info, status):
+    data = blockMoveSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+blockMoveSoundWave = wave.open(os.path.join('sounds', 'blockMoveSound.wav'), 'rb')
+blockMoveSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockMoveSoundWave.getsampwidth()),
+                channels=blockMoveSoundWave.getnchannels(),
+                rate=blockMoveSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackBlockMoveSound)
+
+def callbackBlockRotationSound(in_data, frame_count, time_info, status):
+    data = blockRotationSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+blockRotationSoundWave = wave.open(os.path.join('sounds', 'blockRotationSound2.wav'), 'rb')
+blockRotationSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockRotationSoundWave.getsampwidth()),
+                channels=blockRotationSoundWave.getnchannels(),
+                rate=blockRotationSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackBlockRotationSound)
+
+def callbackSwapSound(in_data, frame_count, time_info, status):
+    data = swapSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+swapSoundWave = wave.open(os.path.join('sounds', 'swapSound.wav'), 'rb')
+swapSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(swapSoundWave.getsampwidth()),
+                channels=swapSoundWave.getnchannels(),
+                rate=swapSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackSwapSound)
+
+def callbackTetrisSound(in_data, frame_count, time_info, status):
+    data = tetrisSoundWave.readframes(frame_count)
+    return (data, pyaudio.paContinue)
+
+tetrisSoundWave = wave.open(os.path.join('sounds', 'tetrisSound.wav'), 'rb')
+tetrisSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(tetrisSoundWave.getsampwidth()),
+                channels=tetrisSoundWave.getnchannels(),
+                rate=tetrisSoundWave.getframerate(),
+                output=True,
+                start = False,
+                stream_callback=callbackTetrisSound)
 
 blockSize = 30
 nextBlockSize = 20
@@ -743,28 +825,49 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                     if len(checkConflict(grid, currentBlock, [Conflict.TOP])) != 0:
                         currentBlock.x -= 1
                         droppedBlock = True
+                    else:
+                        if blockDownSoundStream.is_stopped() == False and blockDownSoundStream.is_active() == False:
+                            blockDownSoundStream.stop_stream()
+                        blockDownSoundWave.rewind()
+                        blockDownSoundStream.start_stream()
+                        infinity = delayTime
                 elif isLeftInput(event.key, reverseLRTimer):
                     currentBlock.y -= 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y += 1
                     else:
+                        if blockMoveSoundStream.is_stopped() == False and blockMoveSoundStream.is_active() == False:
+                            blockMoveSoundStream.stop_stream()
+                        blockMoveSoundWave.rewind()
+                        blockMoveSoundStream.start_stream()
                         infinity = delayTime
                 elif isRightInput(event.key, reverseLRTimer):
                     currentBlock.y += 1
                     if len(checkConflict(grid, currentBlock, [Conflict.BOTTOM, Conflict.TOP])) != 0:
                         currentBlock.y -= 1
                     else:
+                        if blockMoveSoundStream.is_stopped() == False and blockMoveSoundStream.is_active() == False:
+                            blockMoveSoundStream.stop_stream()
+                        blockMoveSoundWave.rewind()
+                        blockMoveSoundStream.start_stream()
                         infinity = delayTime
                 elif event.key == pygame.K_UP:
+                    if blockRotationSoundStream.is_stopped() == False and blockRotationSoundStream.is_active() == False:
+                        blockRotationSoundStream.stop_stream()
+                    blockRotationSoundStream.start_stream()
+                    blockRotationSoundWave.rewind()
+
                     currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                     conflictTypeList = checkConflict(grid, currentBlock,[Conflict.TOP])
 
                     if len(conflictTypeList) != 0:
                         if Conflict.LEFT in conflictTypeList:
                             if checkLeftRotationConflict(grid, currentBlock):
+                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                         elif Conflict.RIGHT in conflictTypeList:
                             if checkRightRotationConflict(grid, currentBlock):
+                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                         elif Conflict.BLOCK in conflictTypeList or Conflict.BOTTOM in conflictTypeList:
                             # 블럭과 충돌이면 일단 위로한칸 올려보고 안되면 왼쪽오른쪽 해본다.
@@ -773,15 +876,19 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                                 currentBlock.x += 1
 
                                 if checkLeftRotationConflict(grid, currentBlock):
+                                    #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                     infinity = delayTime
                                     break
                                 currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                                 if checkRightRotationConflict(grid, currentBlock):
+                                    #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                     infinity = delayTime
                                     break
                             else:
+                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                     else:
+                        #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                         infinity = delayTime
                 elif event.key == pygame.K_1:
                     if isNoItem == False:
@@ -943,3 +1050,20 @@ def menu(surface):
     pygame.display.quit()
 
 menu(surface)
+
+blockDeletedSoundStream.stop_stream()
+blockDeletedSoundStream.close()
+blockDropSoundStream.stop_stream()
+blockDropSoundStream.close()
+blockDownSoundStream.stop_stream()
+blockDownSoundStream.close()
+blockMoveSoundStream.stop_stream()
+blockMoveSoundStream.close()
+blockRotationSoundStream.stop_stream()
+blockRotationSoundStream.close()
+swapSoundStream.stop_stream()
+swapSoundStream.close()
+tetrisSoundStream.stop_stream()
+tetrisSoundStream.close()
+
+pyAudioObj.terminate()
