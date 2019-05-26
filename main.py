@@ -21,13 +21,28 @@ pygame.display.set_caption('KiMiCa\'s Tetris')
 class UserState:
     def __init__(self):
         self.reverseLR = False
+        self.swappedBlock = False
         self.changeBgm()
         return super().__init__()
 
+    def checkMusicFinish(self):
+        return pygame.mixer.music.get_busy() == False
+
     def changeBgm(self):
+        pygame.mixer.music.stop()
         num = random.randrange(0, len(bgmPathList))
         pygame.mixer.music.load(bgmPathList[num])
+        pygame.mixer.music.set_volume(0.1)
         pygame.mixer.music.play()
+
+    def stopBgm(self):
+        pygame.mixer.music.fadeout(1000)
+
+    def isSwappedBlock(self):
+        return self.swappedBlock
+
+    def setSwappedBlock(self, checker):
+        self.swappedBlock = checker
 
 # menu imageList
 # index 0   : 현재 선택된 menu의 index
@@ -119,6 +134,7 @@ reverseLRItem = (1,0,0)
 
 # Sound
 pygame.mixer.init()
+pygame.init()
 
 # bgm
 bgmPathList = []
@@ -738,7 +754,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
-    pygame.key.set_repeat(200, 30)
+    pygame.key.set_repeat(130, 30)
 
     # 전체 게임 플레이 시간 관리
     totalPlayTime = 0
@@ -771,6 +787,9 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
         delayTime += clock.get_time()
         dropLevelTime += clock.get_time()
         totalPlayTime += clock.get_time()
+
+        if user1State.checkMusicFinish():
+            user1State.changeBgm()
 
         if limitTime != 0 and (totalPlayTime / 1000) >= limitTime:
             isFinish = True
@@ -808,17 +827,25 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                     currentBlock.x += distance
                     droppedBlock = True
                 elif event.key == pygame.K_LSHIFT:
-                    if holdBlock == None:
-                        holdBlock = currentBlock
-                        currentBlock = nextBlock
-                        nextBlock = getRandomBlock()
-                    else:
-                        tmpBlock = holdBlock
-                        holdBlock = currentBlock
-                        currentBlock = tmpBlock
-                    holdBlock.x = -2
-                    holdBlock.y = 4
-                    holdBlock.rotation = 0
+                    if user1State.isSwappedBlock() == False:
+                        if swapSoundStream.is_stopped() == False and swapSoundStream.is_active() == False:
+                            swapSoundStream.stop_stream()
+                        swapSoundWave.rewind()
+                        swapSoundStream.start_stream()
+
+                        if holdBlock == None:
+                            holdBlock = currentBlock
+                            currentBlock = nextBlock
+                            nextBlock = getRandomBlock()
+                        else:
+                            tmpBlock = holdBlock
+                            holdBlock = currentBlock
+                            currentBlock = tmpBlock
+                        holdBlock.x = -2
+                        holdBlock.y = 4
+                        holdBlock.rotation = 0
+
+                        user1State.setSwappedBlock(True)
 
                 elif event.key == pygame.K_DOWN:
                     currentBlock.x += 1
@@ -854,8 +881,8 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                 elif event.key == pygame.K_UP:
                     if blockRotationSoundStream.is_stopped() == False and blockRotationSoundStream.is_active() == False:
                         blockRotationSoundStream.stop_stream()
-                    blockRotationSoundStream.start_stream()
                     blockRotationSoundWave.rewind()
+                    blockRotationSoundStream.start_stream()
 
                     currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                     conflictTypeList = checkConflict(grid, currentBlock,[Conflict.TOP])
@@ -863,11 +890,9 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                     if len(conflictTypeList) != 0:
                         if Conflict.LEFT in conflictTypeList:
                             if checkLeftRotationConflict(grid, currentBlock):
-                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                         elif Conflict.RIGHT in conflictTypeList:
                             if checkRightRotationConflict(grid, currentBlock):
-                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                         elif Conflict.BLOCK in conflictTypeList or Conflict.BOTTOM in conflictTypeList:
                             # 블럭과 충돌이면 일단 위로한칸 올려보고 안되면 왼쪽오른쪽 해본다.
@@ -876,19 +901,15 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                                 currentBlock.x += 1
 
                                 if checkLeftRotationConflict(grid, currentBlock):
-                                    #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                     infinity = delayTime
                                     break
                                 currentBlock.rotation = (currentBlock.rotation + 1) % len(currentBlock.block)
                                 if checkRightRotationConflict(grid, currentBlock):
-                                    #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                     infinity = delayTime
                                     break
                             else:
-                                #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                                 infinity = delayTime
                     else:
-                        #rotationSoundChannelList[rotationSoundChannelCount].unpause()
                         infinity = delayTime
                 elif event.key == pygame.K_1:
                     if isNoItem == False:
@@ -906,6 +927,11 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
         drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
         if droppedBlock:
+            if blockDropSoundStream.is_stopped() == False and blockDropSoundStream.is_active() == False:
+                blockDropSoundStream.stop_stream()
+            blockDropSoundWave.rewind()
+            blockDropSoundStream.start_stream()
+
             currentBlock = nextBlock
 
             nextBlock = getRandomBlock()
@@ -926,24 +952,41 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
             else:
                 comboStack = 0
 
+            comboScoreMulti = (comboStack // 3) + 1
+            if comboStack > 1:
+                comboScoreMulti += 1
+
             if delLineCount == 4:
+                if tetrisSoundStream.is_stopped() == False and tetrisSoundStream.is_active() == False:
+                    swapSoundStream.stop_stream()
+                tetrisSoundWave.rewind()
+                tetrisSoundStream.start_stream()
                 # tetris(4줄을 한번에 없애는 것)는 점수 2배
-                score += delLineCount * 10 * 2 * comboStack * tetrisComboStack
+                score += delLineCount * 10 * 2 * comboScoreMulti * tetrisComboStack
             else:
-                score += delLineCount * 10 * comboStack
+                score += delLineCount * 10 * comboScoreMulti
 
             ghostBlock = setGhostBlock(grid, currentBlock)
+            user1State.setSwappedBlock(False)
 
 
         updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
 
         if isFinish or checkFinish(grid, currentBlock):
 
+            user1State.stopBgm()
             drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over!")
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Please wait 3 seconds", 50)
+            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to Check to Your Score", 50)
 
             pygame.display.flip()
-            pygame.time.delay(3000)
+            goScorePage = False
+            while goScorePage == False:
+                pygame.time.delay(100)
+                for event in pygame.event.get():
+                    if event.type == pygame.KEYDOWN:
+                        if event.key == pygame.K_ESCAPE:
+                            goScorePage = True
+                            break
 
             surface.fill(black)
             drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Your Score : " + str(score))
@@ -958,6 +1001,8 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                             break
 
         copiedGrid = copy.deepcopy(grid)
+
+    user1State.stopBgm()
 
 def updateMenuScreen(surface):
     surface.fill(black) # 메뉴 창 검정색 바탕
@@ -1045,7 +1090,6 @@ def menu(surface):
                     if menuImgList[0] == 0:
                         menuImgList[0] = len(menuImgList) - 1
                     changeSelectedMenu()
-
 
     pygame.display.quit()
 
