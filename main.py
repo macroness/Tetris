@@ -648,8 +648,8 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
 
     updateBlockBoxSurface(nextBlockSurface, nextBlock)
     updateBlockBoxSurface(holdBlockSurface, holdBlock)
-    drawMessage(surface, "Ariel", 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
-    drawMessage(surface, "Ariel", 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
+    drawMessage(surface, "Arial", 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
+    drawMessage(surface, "Arial", 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
 
     if isNoitem == False:
         drawItemSlot(itemSlotSurface, itemList)
