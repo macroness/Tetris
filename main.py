@@ -940,6 +940,8 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
         drawBlock(copiedGrid, blockValidPositions, currentBlock.color)
 
         if droppedBlock:
+            delayTime = 0
+
             if blockDropSoundStream.is_stopped() == False and blockDropSoundStream.is_active() == False:
                 blockDropSoundStream.stop_stream()
             blockDropSoundWave.rewind()
