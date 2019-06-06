@@ -5,6 +5,7 @@ import enum
 import os
 import wave
 import pyaudio
+import sys
 
 from block import Block
 from block import BlockType
@@ -16,6 +17,16 @@ screen_h = 900
 
 surface = pygame.display.set_mode((screen_w, screen_h))
 pygame.display.set_caption('KiMiCa\'s Tetris')
+
+def resource_path(relative_path):
+    """ Get absolute path to resource, works for dev and for PyInstaller """
+    try:
+        # PyInstaller creates a temp folder and stores path in _MEIPASS
+        base_path = sys._MEIPASS
+    except Exception:
+        base_path = os.path.abspath(".")
+
+    return os.path.join(base_path, relative_path)
 
 # TODO : UserState에 grid류도 다 넣자.
 class UserState:
@@ -50,35 +61,35 @@ class UserState:
 menuImgList = []
 
 # menu images
-selectedNormalModePlayImg = pygame.image.load(os.path.join('img', 'selectedNormalModePlay.png')).convert()
+selectedNormalModePlayImg = pygame.image.load(resource_path(os.path.join('img', 'selectedNormalModePlay.png'))).convert()
 selectedNormalModePlayImg = pygame.transform.scale(selectedNormalModePlayImg, (301, 60))
-unselectedNormalModePlayImg = pygame.image.load(os.path.join('img', 'unselectedNormalModePlay.png')).convert()
+unselectedNormalModePlayImg = pygame.image.load(resource_path(os.path.join('img', 'unselectedNormalModePlay.png'))).convert()
 unselectedNormalModePlayImg = pygame.transform.scale(unselectedNormalModePlayImg, (301, 60))
-selectedMarathonModePlayImg = pygame.image.load(os.path.join('img', 'selectedMarathonModePlay.png')).convert()
+selectedMarathonModePlayImg = pygame.image.load(resource_path(os.path.join('img', 'selectedMarathonModePlay.png'))).convert()
 selectedMarathonModePlayImg = pygame.transform.scale(selectedMarathonModePlayImg, (301, 60))
-unselectedMarathonModePlayImg = pygame.image.load(os.path.join('img', 'unselectedMarathonModePlay.png')).convert()
+unselectedMarathonModePlayImg = pygame.image.load(resource_path(os.path.join('img', 'unselectedMarathonModePlay.png'))).convert()
 unselectedMarathonModePlayImg = pygame.transform.scale(unselectedMarathonModePlayImg, (301, 60))
-selectedGameFinishImg = pygame.image.load(os.path.join('img', 'selectedGameFinish.png')).convert()
+selectedGameFinishImg = pygame.image.load(resource_path(os.path.join('img', 'selectedGameFinish.png'))).convert()
 selectedGameFinishImg = pygame.transform.scale(selectedGameFinishImg, (301, 60))
-unselectedGameFinishImg = pygame.image.load(os.path.join('img', 'unselectedGameFinish.png')).convert()
+unselectedGameFinishImg = pygame.image.load(resource_path(os.path.join('img', 'unselectedGameFinish.png'))).convert()
 unselectedGameFinishImg = pygame.transform.scale(unselectedGameFinishImg, (301, 60))
-selectedOpInfoImg = pygame.image.load(os.path.join('img', 'selectedOpInfo.png')).convert()
+selectedOpInfoImg = pygame.image.load(resource_path(os.path.join('img', 'selectedOpInfo.png'))).convert()
 selectedOpInfoImg = pygame.transform.scale(selectedOpInfoImg, (301, 60))
-unselectedOpInfoImg = pygame.image.load(os.path.join('img', 'unselectedOpInfo.png')).convert()
+unselectedOpInfoImg = pygame.image.load(resource_path(os.path.join('img', 'unselectedOpInfo.png'))).convert()
 unselectedOpInfoImg = pygame.transform.scale(unselectedOpInfoImg, (301, 60))
 
 #menu explain images
-normalModeExplainImg =  pygame.image.load(os.path.join('img', 'normalModeExplain.png')).convert()
+normalModeExplainImg =  pygame.image.load(resource_path(os.path.join('img', 'normalModeExplain.png'))).convert()
 normalModeExplainImg = pygame.transform.scale(normalModeExplainImg, (250, 50))
-marathonModeExplainImg =  pygame.image.load(os.path.join('img', 'marathonModeExplain.png')).convert()
+marathonModeExplainImg =  pygame.image.load(resource_path(os.path.join('img', 'marathonModeExplain.png'))).convert()
 marathonModeExplainImg = pygame.transform.scale(marathonModeExplainImg, (250, 50))
-operationExplainImg =  pygame.image.load(os.path.join('img', 'operationExplain.png')).convert()
+operationExplainImg =  pygame.image.load(resource_path(os.path.join('img', 'operationExplain.png'))).convert()
 operationExplainImg = pygame.transform.scale(operationExplainImg, (250, 50))
-finishExplainImg =  pygame.image.load(os.path.join('img', 'finishExplain.png')).convert()
+finishExplainImg =  pygame.image.load(resource_path(os.path.join('img', 'finishExplain.png'))).convert()
 finishExplainImg = pygame.transform.scale(finishExplainImg, (250, 50))
 
 # operation Information page image
-opInfoImg = pygame.image.load(os.path.join('img', 'operationInfoPage.png')).convert()
+opInfoImg = pygame.image.load(resource_path(os.path.join('img', 'operationInfoPage.png'))).convert()
 opInfoImg = pygame.transform.scale(opInfoImg, (644, 600))
 
 # colors
@@ -96,19 +107,19 @@ itemImgList = []
 itemImgList.append(0)
 
 # item image load
-plus1Img = pygame.image.load(os.path.join('img', 'plus1.png')).convert()
+plus1Img = pygame.image.load(resource_path(os.path.join('img', 'plus1.png'))).convert()
 plus1Img = pygame.transform.scale(plus1Img, (30, 30))
-plus2Img = pygame.image.load(os.path.join('img', 'plus2.png')).convert()
+plus2Img = pygame.image.load(resource_path(os.path.join('img', 'plus2.png'))).convert()
 plus2Img = pygame.transform.scale(plus2Img, (30, 30))
-minus1Img = pygame.image.load(os.path.join('img', 'minus1.png')).convert()
+minus1Img = pygame.image.load(resource_path(os.path.join('img', 'minus1.png'))).convert()
 minus1Img = pygame.transform.scale(minus1Img, (30, 30))
-minus2Img = pygame.image.load(os.path.join('img', 'minus2.png')).convert()
+minus2Img = pygame.image.load(resource_path(os.path.join('img', 'minus2.png'))).convert()
 minus2Img = pygame.transform.scale(minus2Img, (30, 30))
-zigzag2Img = pygame.image.load(os.path.join('img', 'zigzag.png')).convert()
+zigzag2Img = pygame.image.load(resource_path(os.path.join('img', 'zigzag.png'))).convert()
 zigzag2Img = pygame.transform.scale(zigzag2Img, (30, 30))
-hole2Img = pygame.image.load(os.path.join('img', 'hole.png')).convert()
+hole2Img = pygame.image.load(resource_path(os.path.join('img', 'hole.png'))).convert()
 hole2Img = pygame.transform.scale(hole2Img, (30, 30))
-reverseLRItem2Img = pygame.image.load(os.path.join('img', 'reverseLRItem.png')).convert()
+reverseLRItem2Img = pygame.image.load(resource_path(os.path.join('img', 'reverseLRItem.png'))).convert()
 reverseLRItem2Img = pygame.transform.scale(reverseLRItem2Img, (30, 30))
 
 # item의 이미지들을 담고있는 list (index 1부터 유효함)
@@ -138,13 +149,13 @@ pygame.init()
 
 # bgm
 bgmPathList = []
-bgmPathList.append(os.path.join('bgm', 'Butchers.mp3'))
-bgmPathList.append(os.path.join('bgm', 'Arms_Dealer.mp3'))
-bgmPathList.append(os.path.join('bgm', 'OK_POP_KO.mp3'))
-bgmPathList.append(os.path.join('bgm', 'I_m_Happy_For_This_Guitar.mp3'))
-bgmPathList.append(os.path.join('bgm', 'Always_Be_My_Unicorn.mp3'))
-bgmPathList.append(os.path.join('bgm', 'How_it_Began.mp3'))
-bgmPathList.append(os.path.join('bgm', 'We_Share_This.mp3'))
+bgmPathList.append(resource_path(os.path.join('bgm', 'Butchers.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'Arms_Dealer.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'OK_POP_KO.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'I_m_Happy_For_This_Guitar.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'Always_Be_My_Unicorn.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'How_it_Began.mp3')))
+bgmPathList.append(resource_path(os.path.join('bgm', 'We_Share_This.mp3')))
 
 # sound effect
 
@@ -154,7 +165,7 @@ def callbackBlockDeletedSound(in_data, frame_count, time_info, status):
     data = blockDeletedSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-blockDeletedSoundWave = wave.open(os.path.join('sounds', 'blockDeletedSound.wav'), 'rb')
+blockDeletedSoundWave = wave.open(resource_path(os.path.join('sounds', 'blockDeletedSound.wav')), 'rb')
 blockDeletedSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDeletedSoundWave.getsampwidth()),
                 channels=blockDeletedSoundWave.getnchannels(),
                 rate=blockDeletedSoundWave.getframerate(),
@@ -166,7 +177,7 @@ def callbackBlockDropSound(in_data, frame_count, time_info, status):
     data = blockDropSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-blockDropSoundWave = wave.open(os.path.join('sounds', 'blockDropSound.wav'), 'rb')
+blockDropSoundWave = wave.open(resource_path(os.path.join('sounds', 'blockDropSound.wav')), 'rb')
 blockDropSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDropSoundWave.getsampwidth()),
                 channels=blockDropSoundWave.getnchannels(),
                 rate=blockDropSoundWave.getframerate(),
@@ -178,7 +189,7 @@ def callbackBlockDownSound(in_data, frame_count, time_info, status):
     data = blockDownSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-blockDownSoundWave = wave.open(os.path.join('sounds', 'blockDownSound.wav'), 'rb')
+blockDownSoundWave = wave.open(resource_path(os.path.join('sounds', 'blockDownSound.wav')), 'rb')
 blockDownSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockDownSoundWave.getsampwidth()),
                 channels=blockDownSoundWave.getnchannels(),
                 rate=blockDownSoundWave.getframerate(),
@@ -190,7 +201,7 @@ def callbackBlockMoveSound(in_data, frame_count, time_info, status):
     data = blockMoveSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-blockMoveSoundWave = wave.open(os.path.join('sounds', 'blockMoveSound.wav'), 'rb')
+blockMoveSoundWave = wave.open(resource_path(os.path.join('sounds', 'blockMoveSound.wav')), 'rb')
 blockMoveSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockMoveSoundWave.getsampwidth()),
                 channels=blockMoveSoundWave.getnchannels(),
                 rate=blockMoveSoundWave.getframerate(),
@@ -202,7 +213,7 @@ def callbackBlockRotationSound(in_data, frame_count, time_info, status):
     data = blockRotationSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-blockRotationSoundWave = wave.open(os.path.join('sounds', 'blockRotationSound2.wav'), 'rb')
+blockRotationSoundWave = wave.open(resource_path(os.path.join('sounds', 'blockRotationSound2.wav')), 'rb')
 blockRotationSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(blockRotationSoundWave.getsampwidth()),
                 channels=blockRotationSoundWave.getnchannels(),
                 rate=blockRotationSoundWave.getframerate(),
@@ -214,7 +225,7 @@ def callbackSwapSound(in_data, frame_count, time_info, status):
     data = swapSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-swapSoundWave = wave.open(os.path.join('sounds', 'swapSound.wav'), 'rb')
+swapSoundWave = wave.open(resource_path(os.path.join('sounds', 'swapSound.wav')), 'rb')
 swapSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(swapSoundWave.getsampwidth()),
                 channels=swapSoundWave.getnchannels(),
                 rate=swapSoundWave.getframerate(),
@@ -226,7 +237,7 @@ def callbackTetrisSound(in_data, frame_count, time_info, status):
     data = tetrisSoundWave.readframes(frame_count)
     return (data, pyaudio.paContinue)
 
-tetrisSoundWave = wave.open(os.path.join('sounds', 'tetrisSound.wav'), 'rb')
+tetrisSoundWave = wave.open(resource_path(os.path.join('sounds', 'tetrisSound.wav')), 'rb')
 tetrisSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(tetrisSoundWave.getsampwidth()),
                 channels=tetrisSoundWave.getnchannels(),
                 rate=tetrisSoundWave.getframerate(),
@@ -235,6 +246,7 @@ tetrisSoundStream = pyAudioObj.open(format=pyAudioObj.get_format_from_width(tetr
                 stream_callback=callbackTetrisSound)
 
 blockSize = 30
+topLineBlockSize = 10
 nextBlockSize = 20
 # 테두리 두께
 outline_w = 3
@@ -242,7 +254,7 @@ outline_w = 3
 inline_w = 1
 
 grid_w = (10*blockSize) + (9*inline_w) + (2*outline_w)
-grid_h = (20*blockSize) + (19*inline_w) + (2*outline_w)
+grid_h = (20*blockSize) + (19*inline_w) + (2*outline_w) + (1*inline_w) + (1*blockSize) # 뒤 두개는 맨윗줄 조금보이는 것을 위해 넣음
 
 nextBlockRect_w = ((((screen_w - grid_w) // 2) * 0.70) + outline_w) // 1
 nextBlockRect_h = nextBlockRect_w
@@ -417,21 +429,22 @@ def isItem(block):
 
 def drawGrid(surface, grid):
     # 회색 배경
-    pygame.draw.rect(surface, gray, (3, 3, grid_w - (2*outline_w), grid_h - (2*outline_w)))
+    pygame.draw.rect(surface, gray, (outline_w, outline_w, grid_w - (2*outline_w), grid_h - (2*outline_w)))
 
-    for i in range(0, grid_row - 5):
+    for i in range(0, grid_row - 4):
         y = 3 + i * (inline_w + blockSize)
         for j in range(0, grid_col - 2):
             x = 3 + j * (inline_w + blockSize)
-            if isItem(grid[i+4][j+1]):
-                imgRect = itemImgList[grid[i+4][j+1][0]].get_rect()
+            if isItem(grid[i+3][j+1]):
+                imgRect = itemImgList[grid[i+3][j+1][0]].get_rect()
                 imgRect.x = x
                 imgRect.y = y
-                surface.blit(itemImgList[grid[i+4][j+1][0]], imgRect)
+                surface.blit(itemImgList[grid[i+3][j+1][0]], imgRect)
             else:
-                pygame.draw.rect(surface, grid[i+4][j+1], (x, y, blockSize, blockSize))
+                pygame.draw.rect(surface, grid[i+3][j+1], (x, y, blockSize, blockSize))
 
-    pygame.draw.rect(surface, purple, (0, 0, grid_w - outline_w, grid_h - outline_w), outline_w)
+    pygame.draw.rect(surface, black, (outline_w, outline_w, grid_w - (2*outline_w), blockSize - topLineBlockSize - inline_w))
+    pygame.draw.rect(surface, purple, (0, blockSize - topLineBlockSize - inline_w, grid_w - outline_w, grid_h - (blockSize - topLineBlockSize - inline_w)), outline_w)
 
 # grid는 각 칸마다 색 또는 아이템을 표현하는 값을 갖고있음.
 def createGrid():
@@ -709,17 +722,17 @@ def useItem(grid, item, userState):
         userState.reverseLR = True
 
 def isRightInput(key, reversed):
-    if key == pygame.K_RIGHT and reversed == 0:
+    if (key == pygame.K_RIGHT or key == pygame.K_9) and reversed == 0:
         return True
-    if key == pygame.K_LEFT and reversed != 0:
+    if (key == pygame.K_LEFT or pygame.K_7) and reversed != 0:
         return True
 
     return False
 
 def isLeftInput(key, reversed):
-    if key == pygame.K_LEFT and reversed == 0:
+    if (key == pygame.K_LEFT or key == pygame.K_7) and reversed == 0:
         return True
-    if key == pygame.K_RIGHT and reversed != 0:
+    if (key == pygame.K_RIGHT or key == pygame.K_9) and reversed != 0:
         return True
 
     return False
@@ -878,7 +891,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                         blockMoveSoundWave.rewind()
                         blockMoveSoundStream.start_stream()
                         infinity = delayTime
-                elif event.key == pygame.K_UP:
+                elif event.key == pygame.K_UP or event.key == pygame.K_8:
                     if blockRotationSoundStream.is_stopped() == False and blockRotationSoundStream.is_active() == False:
                         blockRotationSoundStream.stop_stream()
                     blockRotationSoundWave.rewind()
