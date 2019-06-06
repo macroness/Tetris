@@ -1,0 +1,16 @@
+*.spec
+*.pkg
+*.toc
+*.zip
+*.pyc
+*.pyz
+*.html
+*.txt
+*.manifest
+*.sln
+*.pyproj
+
+
+build\
+build\tetris\
+dist\
