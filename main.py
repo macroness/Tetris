@@ -283,7 +283,9 @@ clock = pygame.time.Clock()
 defaultLevelUpTime = 10
 
 # 중력 레벨업시 배수
-gravityMultiple = 0.7
+gravityLevelUp = 0.8
+# 중력 레벨다운시 배수
+gravityLevelDown= 1.25 
 
 class Conflict(enum.Enum):
     NONE = 0 # 충돌하지 않음
@@ -822,7 +824,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
         # levelUpTime == 0 이면 레벨업 하지 않음.(싱글 모드)
         if levelUpTime != 0 and (dropLevelTime / 1000) > levelUpTime:
             dropLevelTime = 0
-            dropSpeed = dropSpeed * gravityMultiple
+            dropSpeed = dropSpeed * gravityLevelUp
 
         if reverseLRTimer != 0:
             reverseLRTimer += clock.get_time()
@@ -924,6 +926,12 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                                 infinity = delayTime
                     else:
                         infinity = delayTime
+                elif event.key == pygame.K_z:
+                    if dropSpeed < 2:
+                        dropSpeed = dropSpeed * gravityLevelDown
+                elif event.key == pygame.K_x:
+                    if dropSpeed > 0.017:
+                        dropSpeed = dropSpeed * gravityLevelUp
                 elif event.key == pygame.K_1:
                     if isNoItem == False:
                         if 0 < len(itemList):
