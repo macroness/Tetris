@@ -309,14 +309,18 @@ def drawSubsurfaceCenter(surface, subSurface, adjX = 0, adjY = 0):
     centerY = screen_h // 2 + adjY
     drawSubsurface(surface, subSurface, centerX, centerY)
 
-def drawMessageCenter(surface, fontName, fontSize, fontColor, bgColor, msg, adjY = 0):
-    font = pygame.font.SysFont(fontName, fontSize)
+def drawMessageCenter(surface, fontSize, fontColor, bgColor, msg, adjY = 0):
+    fontname = resource_path(os.path.join('fonts', 'Lora-Regular.ttf')) 
+    font = pygame.font.Font(fontname, fontSize)
+
     # 둥근 모서리로 흰색 글자 그리기
     textBox = font.render(msg, True, fontColor, bgColor)
     drawSubsurfaceCenter(surface, textBox, 0, adjY)
 
-def drawMessage(surface, fontName, fontSize, fontColor, bgColor, msg, centerX, centerY):
-    font = pygame.font.SysFont(fontName, fontSize)
+def drawMessage(surface, fontSize, fontColor, bgColor, msg, centerX, centerY):
+    fontname = resource_path(os.path.join('fonts', 'Lora-Regular.ttf')) 
+    font = pygame.font.Font(fontname, fontSize)
+
     # 둥근 모서리로 흰색 글자 그리기
     textBox = font.render(msg, True, fontColor, bgColor)
     drawSubsurface(surface, textBox, centerX, centerY)
@@ -660,16 +664,16 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
     surface.fill(black)
 
     drawGrid(gridSurface, grid)
-
     updateBlockBoxSurface(nextBlockSurface, nextBlock)
     updateBlockBoxSurface(holdBlockSurface, holdBlock)
-    drawMessage(surface, "Arial", 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
-    drawMessage(surface, "Arial", 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
+    drawMessage(surface, 20, yellow, black, "Next Block", nextBlockRect_centerX, nextBlockRect_centerY - 85)
+    drawMessage(surface, 20, yellow, black, "Hold Block", holdBlockRect_centerX, holdBlockRect_centerY - 85)
 
     if isNoitem == False:
         drawItemSlot(itemSlotSurface, itemList)
 
-    drawMessageCenter(surface, "Arial", 30, white, black, "SCORE : " + str(score), -360)
+    drawMessageCenter(surface, 30, white, black, "SCORE : " + str(score), -360)
+
     pygame.display.flip()
 
 # item 함수들
@@ -765,7 +769,6 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
 
     score = 0
     updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
-
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
@@ -998,8 +1001,8 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
         if isFinish or checkFinish(grid, currentBlock):
 
             user1State.stopBgm()
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Game Over!")
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to Check to Your Score", 50)
+            drawMessageCenter(surface, 40, white, (40, 40, 40), "Game Over!")
+            drawMessageCenter(surface, 40, white, (40, 40, 40), "Press ESC to Check to Your Score", 50)
 
             pygame.display.flip()
             goScorePage = False
@@ -1012,8 +1015,8 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                             break
 
             surface.fill(black)
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Your Score : " + str(score))
-            drawMessageCenter(surface, "Arial", 40, white, (40, 40, 40), "Press ESC to go to the menu", 50)
+            drawMessageCenter(surface, 40, white, (40, 40, 40), "Your Score : " + str(score))
+            drawMessageCenter(surface, 40, white, (40, 40, 40), "Press ESC to go to the menu", 50)
             pygame.display.flip()
             while run:
                 pygame.time.delay(100)
@@ -1095,7 +1098,7 @@ def menu(surface):
                     break
                 elif event.key == pygame.K_RETURN:
                     if menuImgList[0] == 1:
-                        gameStart(surface, 1, 0, 30, True)
+                        gameStart(surface, 1, 0, 300, True)
                     elif menuImgList[0] == 2:
                         gameStart(surface, 1, 0, 0, True);
                     elif menuImgList[0] == 3:
