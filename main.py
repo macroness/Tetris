@@ -1100,7 +1100,7 @@ def menu(surface):
                     break
                 elif event.key == pygame.K_RETURN:
                     if menuImgList[0] == 1:
-                        gameStart(surface, 1, 0, 300, True)
+                        gameStart(surface, 1, 0, 180, True)
                     elif menuImgList[0] == 2:
                         gameStart(surface, 1, 0, 0, True);
                     elif menuImgList[0] == 3:
