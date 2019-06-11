@@ -859,7 +859,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                             tmpBlock = holdBlock
                             holdBlock = currentBlock
                             currentBlock = tmpBlock
-                        holdBlock.x = -2
+                        holdBlock.x = 1
                         holdBlock.y = 4
                         holdBlock.rotation = 0
 
