@@ -772,7 +772,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
-    pygame.key.set_repeat(130, 30)
+    pygame.key.set_repeat(180, 30)
 
     # 전체 게임 플레이 시간 관리
     totalPlayTime = 0
