@@ -660,7 +660,7 @@ def updateBlockBoxSurface(surface, block):
     drawBlockBox(surface.subsurface(rect), block.blockType, block.color)
 
 
-def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, grid, nextBlock, holdBlock, itemList, score, isNoitem):
+def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, grid, nextBlock, holdBlock, itemList, score, isNoitem, playTime):
     surface.fill(black)
 
     drawGrid(gridSurface, grid)
@@ -673,6 +673,22 @@ def updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemS
         drawItemSlot(itemSlotSurface, itemList)
 
     drawMessageCenter(surface, 30, white, black, "SCORE : " + str(score), -360)
+    second = playTime // 1000
+    minute = second // 60
+    minStr = ''
+    if minute < 10:
+        minStr = '0' + str(minute)
+    else:
+        minStr = str(minute)
+
+    second = second % 60
+    secStr = ''
+    if second < 10:
+        secStr = '0' + str(second)
+    else:
+        secStr = str(second)
+
+    drawMessageCenter(surface, 30, yellow, black, minStr + " : " + secStr, -400)
 
     pygame.display.flip()
 
@@ -767,15 +783,16 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
 
     itemList = []
 
+    # 전체 게임 플레이 시간 관리
+    totalPlayTime = 0
+
     score = 0
-    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
+    updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem, totalPlayTime)
     # 회전이나 좌우 이동에 성공했을때 블럭이 바닥에 고정되지 않게 해준다.
     infinity = 0
 
     pygame.key.set_repeat(180, 30)
 
-    # 전체 게임 플레이 시간 관리
-    totalPlayTime = 0
     # 떨어지는 시간 관리
     dropTime = 0
     # 떨어지는 단계 시간 관리
@@ -998,7 +1015,7 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
             user1State.setSwappedBlock(False)
 
 
-        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem)
+        updateScreen(surface, gridSurface, nextBlockSurface, holdBlockSurface, itemSlotSurface, copiedGrid, nextBlock, holdBlock, itemList, score, isNoItem, totalPlayTime)
 
         if isFinish or checkFinish(grid, currentBlock):
 
