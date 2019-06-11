@@ -836,7 +836,9 @@ def gameStart(surface, dropSpeed, levelUpTime, limitTime, isNoItem):
                 user1State.reverseLR = False
 
         for event in pygame.event.get():
-            if event.type == pygame.KEYDOWN:
+            if event.type == pygame.QUIT:
+                sys.exit()
+            elif event.type == pygame.KEYDOWN:
                 if event.key == pygame.K_ESCAPE:
                     run = False
                     break
