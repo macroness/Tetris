@@ -5,7 +5,6 @@
 *.pyc
 *.pyz
 *.html
-*.txt
 *.manifest
 *.sln
 *.pyproj

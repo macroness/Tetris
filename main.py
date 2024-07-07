@@ -7,8 +7,7 @@ import wave
 import pyaudio
 import sys
 
-from block import Block
-from block import BlockType
+from Block import Block, BlockType
 
 pygame.init()
 
